@@ -30,7 +30,7 @@ LRESULT WF::WindowProc::MessageProcRun(HWND wnd, UINT msg, WPARAM wParam, LPARAM
 	// Extract IMessageReciver
 	WF::IMessageReciver* ptrReciver = (WF::IMessageReciver*)GetWindowLongPtr(wnd, GWLP_USERDATA);
 	// Call reciver
-	ptrReciver->processMessage(wnd, msg, wParam, lParam);
+	return ptrReciver->processMessage(wnd, msg, wParam, lParam);
 }
 
 WF::WindowProc::WindowProc() {
