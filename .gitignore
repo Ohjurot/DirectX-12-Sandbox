@@ -1,0 +1,7 @@
+# Binaries and intermediates
+**/bin/
+**/bin-int/
+**.exe
+
+# Visual studio files
+.vs/
