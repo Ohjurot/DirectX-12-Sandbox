@@ -60,6 +60,5 @@ WF::WindowProc::WindowProc() {
 
 WF::WindowProc::~WindowProc(){
 	// Unregister class
-	MessageBox(NULL, L"Tada", L"Le", MB_OK);
 	UnregisterClass(c_className, m_hInstance);
 }
