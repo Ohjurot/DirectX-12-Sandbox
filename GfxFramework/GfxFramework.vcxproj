@@ -92,7 +92,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\WindowFramework\Window.cpp" />
+    <ClCompile Include="src\WindowFramework\WindowProc.cpp" />
     <ClCompile Include="src\WinMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\WindowFramework\IMessageReciver.h" />
+    <ClInclude Include="src\WindowFramework\Window.h" />
+    <ClInclude Include="src\WindowFramework\WindowProc.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
