@@ -29,6 +29,7 @@ namespace WF {
 			WF::MouseState getMouseState();
 
 			// Window function
+			HWND getHandle();
 			BOOL setVisible(BOOL visible);
 
 		private:

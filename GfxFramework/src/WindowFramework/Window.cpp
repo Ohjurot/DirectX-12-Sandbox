@@ -164,6 +164,10 @@ WF::MouseState WF::Window::getMouseState(){
 	return m_mouseState;
 }
 
+HWND WF::Window::getHandle(){
+	return m_hwnd;
+}
+
 BOOL WF::Window::setVisible(BOOL visible){
 	// Return false if handle is not valid
 	if (m_hwnd == NULL) {
