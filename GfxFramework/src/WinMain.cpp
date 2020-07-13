@@ -45,16 +45,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	ID3D12Fence* ptrFence = nullptr;
 	UINT uiFence = 0;
 	ptrDevice->CreateFence(
-		0,
+		uiFence,
 		D3D12_FENCE_FLAG_NONE,
 		IID_PPV_ARGS(&ptrFence)
 	);
-
-	// Read Descriptor size
-	UINT uiDescHeapSizeRTV			= ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	UINT uiDescHeapSizeDSV			= ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-	UINT uiDescHeapSizeCBV_SRV_UAV	= ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	UINT uiDescHeapSizeSAMPLER		= ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 	// Command Que -> Allocator -> List
 	ID3D12CommandQueue*			ptrCmdQue = nullptr;
@@ -104,6 +98,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	// Create swap chain
 	ptrFactory->CreateSwapChain(ptrCmdQue, &swapDesc, &ptrSwapChain);
+
+	// Read Descriptor size
+	UINT uiDescHeapSizeRTV = ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	UINT uiDescHeapSizeDSV = ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	UINT uiDescHeapSizeCBV_SRV_UAV = ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	UINT uiDescHeapSizeSAMPLER = ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 	// RTV Desc Heap
 	ID3D12DescriptorHeap* ptrDescHeapRtv = nullptr;
