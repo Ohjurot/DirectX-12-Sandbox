@@ -97,7 +97,9 @@ LRESULT WF::Window::processMessage(HWND wnd, UINT msg, WPARAM wParam, LPARAM lPa
 			{
 				// No Foucs
 				m_bInFocus = FALSE;
-				// Clear all bits
+
+				// Clear member
+				ZeroMemory(&m_mouseState, sizeof(WF::MouseState));
 				m_keyState.reset();
 			}
 			break;
