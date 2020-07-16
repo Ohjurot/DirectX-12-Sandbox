@@ -1,6 +1,11 @@
 #include "./RootSignature.hlsl"
 
+struct dIn{
+	float4 pos : SV_Position;
+	float3 color : COLOR;
+};
+
 [RootSignature(MyRS)]
-float4 main(float4 pos : SV_POSITION) : SV_TARGET{
-	return float4(1.0, 1.0f, 1.0f, 1.0f);
+float4 main(dIn data) : SV_TARGET{
+	return float4(data.color, 1.0f);
 }

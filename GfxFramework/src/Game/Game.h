@@ -17,7 +17,8 @@ namespace MY {
 			
 			// Vertex deffinition
 			struct Vertex {
-				float posX, posY, posZ;
+				float posX, posY;
+				float r, g, b;
 			};
 
 			// ================
@@ -47,15 +48,16 @@ namespace MY {
 			
 			// Vertex buffer for triangle
 			const Vertex c_cpuBuffer[3] = {
-				{0.0f, 0.5f, 0.0f},
-				{-0.5f, -0.5f, 0.0f},
-				{0.5f, -0.5f, 0.0f},
+				{0.0f, 0.5f,		1.0f, 0.0f, 0.0f},
+				{-0.5f, -0.5f,		0.0f, 1.0f, 0.0f},
+				{0.5f, -0.5f,		0.0f, 0.0f, 1.0f},
 			};
 			
 			// Vertex input layout descriptor
-			const D3D12_INPUT_ELEMENT_DESC m_inputDescVertex[1] = {
+			const D3D12_INPUT_ELEMENT_DESC m_inputDescVertex[2] = {
 				// SemanticName,	Semantic Index,	Format,							InputSlot,	ByteOffset,	InputSlotClass,								InstanceDataStepRate
-				{"POSITION",		0,				DXGI_FORMAT_R32G32B32_FLOAT,	0,			0,			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+				{"POSITION",		0,				DXGI_FORMAT_R32G32_FLOAT,		0,			0,			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+				{"COLOR",			0,				DXGI_FORMAT_R32G32B32_FLOAT,	0,			8,			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
 			};
 
 			// =============================

@@ -98,31 +98,15 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     D3D12_HEAP_PROPERTIES vbUploadHeapProp;
     ZeroMemory(&vbUploadHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
     vbUploadHeapProp.Type = D3D12_HEAP_TYPE_UPLOAD;
-    vbUploadHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN; // <<-- SPIELEN
-    vbUploadHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN; // <-- Spielen
-    vbUploadHeapProp.CreationNodeMask = NULL;
-    vbUploadHeapProp.VisibleNodeMask = NULL;
-
-    // Describe Resource
-    D3D12_RESOURCE_DESC vbUploadDesk;
-    ZeroMemory(&vbUploadDesk, sizeof(D3D12_RESOURCE_DESC));
-    vbUploadDesk.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    vbUploadDesk.Width = sizeof(Vertex) * 3;
-    vbUploadDesk.Height = 1;
-    vbUploadDesk.DepthOrArraySize = 1;
-    vbUploadDesk.MipLevels = 1;
-    vbUploadDesk.Format = DXGI_FORMAT_UNKNOWN;
-    vbUploadDesk.SampleDesc.Count = 1;
-    vbUploadDesk.SampleDesc.Quality = 0;
-    vbUploadDesk.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR; // <-- Spielen
-    vbUploadDesk.Flags = D3D12_RESOURCE_FLAG_NONE;
+    vbUploadHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    vbUploadHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
     // Create Upload buffer
     ID3D12Resource* ptrUploadBuffer = NULL;
     m_ptrDevice->getDevice()->CreateCommittedResource(
         &vbUploadHeapProp,
         D3D12_HEAP_FLAG_NONE,
-        &vbUploadDesk,
+        &vbDesk,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         NULL,
         IID_PPV_ARGS(&ptrUploadBuffer)
@@ -130,7 +114,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
     // == Upload Vertext Data
     // Map buffer to system memory
-    void* mem;
+    void* mem = nullptr;
     ptrUploadBuffer->Map(0, NULL, &mem);
 
     // Copy to maped region
@@ -138,6 +122,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
     // Unmap
     ptrUploadBuffer->Unmap(0, NULL);
+    mem = nullptr;
 
     // Copy buffer
     m_ptrDevice->getCommandList()->CopyBufferRegion(m_ptrVertexBuffer, 0, ptrUploadBuffer, 0, sizeof(Vertex) * 3);
@@ -171,7 +156,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     D3D12_RASTERIZER_DESC rasterizerDesk;
     ZeroMemory(&rasterizerDesk, sizeof(D3D12_RASTERIZER_DESC));
 
-    rasterizerDesk.FillMode = D3D12_FILL_MODE_SOLID;
+    rasterizerDesk.FillMode = D3D12_FILL_MODE_SOLID; 
     rasterizerDesk.CullMode = D3D12_CULL_MODE_NONE;
     rasterizerDesk.DepthClipEnable = FALSE;
     rasterizerDesk.FrontCounterClockwise = FALSE;
@@ -188,7 +173,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     ZeroMemory(&psoDesk, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
     psoDesk.pRootSignature = m_ptrRootSig;
-    psoDesk.InputLayout.NumElements = 1;
+    psoDesk.InputLayout.NumElements = 2;
     psoDesk.InputLayout.pInputElementDescs = m_inputDescVertex;
     psoDesk.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesk.VS.BytecodeLength = m_ptrBlbVertex->GetBufferSize(); 
@@ -224,7 +209,7 @@ HRESULT MY::Game::Loop(){
     // Begin frame
     static FLOAT m_clearColor[4] = { 0.388f, 0.733f, 0.949f, 1.0f };
     m_ptrSwapChain->beginFrame(m_ptrDevice, m_clearColor);
-    m_ptrView->bind(m_ptrDevice);       // <-- Letzes mal vergessen!
+    m_ptrView->bind(m_ptrDevice);
 
     // === VIDEO 4 ===
 

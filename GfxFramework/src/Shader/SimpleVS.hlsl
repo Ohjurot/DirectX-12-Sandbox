@@ -1,6 +1,13 @@
 #include "./RootSignature.hlsl"
 
+struct sOut{
+	float4 pos : SV_Position;
+	float3 color : COLOR;
+};
+
 [RootSignature(MyRS)]
-void main(float3 pos : POSITION, out float4 oPos : SV_POSITION) {
-	oPos = float4(pos, 1.0f);
+void main(float2 pos : POSITION, float3 color : COLOR, out sOut outData)
+{
+	outData.pos = float4(pos, 0.0f, 1.0f);
+	outData.color = color;
 }
