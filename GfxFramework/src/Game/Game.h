@@ -5,6 +5,8 @@
 #include <dxgi.h>
 #include <d3dcompiler.h>
 
+#include <DirectXMath.h>
+
 #include <Application/App.h>
 #include <Graffics/DirectXContext/d3d_Device.h>
 #include <Graffics/DirectXContext/d3d_SwapChain.h>
@@ -19,6 +21,12 @@ namespace MY {
 			struct Vertex {
 				float posX, posY;
 				float r, g, b;
+			};
+
+			// CBuffer deffiniton
+			struct CBuffer {
+				DirectX::XMMATRIX matView;
+				DirectX::XMMATRIX matTransform;
 			};
 
 			// ================
@@ -42,9 +50,11 @@ namespace MY {
 
 			// Vertex buffer resource
 			ID3D12Resource* m_ptrVertexBuffer = NULL;
-			
-			// View to vertex buffer
 			D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+
+			// Constant buffer
+			ID3D12Resource* m_ptrConstBuffer = NULL;
+			D3D12_CONSTANT_BUFFER_VIEW_DESC m_constBufferView;
 			
 			// Vertex buffer for triangle
 			const Vertex c_cpuBuffer[3] = {
@@ -52,6 +62,8 @@ namespace MY {
 				{-0.5f, -0.5f,		0.0f, 1.0f, 0.0f},
 				{0.5f, -0.5f,		0.0f, 0.0f, 1.0f},
 			};
+
+			CBuffer m_cpuConstBuffer;
 			
 			// Vertex input layout descriptor
 			const D3D12_INPUT_ELEMENT_DESC m_inputDescVertex[2] = {

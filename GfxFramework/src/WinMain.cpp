@@ -11,8 +11,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	
 	// Describe Application
 	Application::Meta meta;
-	meta.clientHeight = 800;
 	meta.clientWidth = 1600;
+	meta.clientHeight = 800;	
 	meta.name = L"GxfFramework";
 	meta.entryPoint = &game;
 
