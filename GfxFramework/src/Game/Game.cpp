@@ -18,54 +18,61 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     m_ptrView = new D3D::View(width, height);
 
     
-    WCHAR buff[MAX_PATH];
-    GetCurrentDirectory(MAX_PATH, buff);
+    // === VIDEO 4 ===
 
-    // Load Vertex shader
+    // == Load Vertex shader
     // From file
     HANDLE hFVertex = CreateFile(L"./SimpleVS.cso", GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFVertex == INVALID_HANDLE_VALUE) {
+        return ERROR_FILE_NOT_FOUND;
+    }
     DWORD hFLen = GetFileSize(hFVertex, NULL);
     SetFilePointer(hFVertex, NULL, NULL, FILE_BEGIN);
     D3DCreateBlob(hFLen, &m_ptrBlbVertex);
     ReadFile(hFVertex, m_ptrBlbVertex->GetBufferPointer(), hFLen, NULL, NULL);
     CloseHandle(hFVertex);
 
-    // Load Pixel shader
+    // == Load Pixel shader
     // From File
     HANDLE hFPixel = CreateFile(L"./SimplePS.cso", GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFVertex == INVALID_HANDLE_VALUE) {
+        return ERROR_FILE_NOT_FOUND;
+    }
     DWORD hFLenP = GetFileSize(hFPixel, NULL);
     SetFilePointer(hFPixel, NULL, NULL, FILE_BEGIN);
     D3DCreateBlob(hFLenP, &m_ptrBlbPixel);
     ReadFile(hFPixel, m_ptrBlbPixel->GetBufferPointer(), hFLenP, NULL, NULL);
     CloseHandle(hFPixel);
 
-    // Load Root signature
+    // == Load Root signature
     // From File
     ID3D10Blob* sig = NULL;
     HANDLE hFRoot = CreateFile(L"./RootSignature.cso", GENERIC_READ, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFVertex == INVALID_HANDLE_VALUE) {
+        return ERROR_FILE_NOT_FOUND;
+    }
     DWORD hFLenR = GetFileSize(hFRoot, NULL);
     SetFilePointer(hFRoot, NULL, NULL, FILE_BEGIN);
     D3DCreateBlob(hFLenR, &sig);
     ReadFile(hFRoot, sig->GetBufferPointer(), hFLenR, NULL, NULL);
     CloseHandle(hFRoot);
+
+    // Create
     hr = m_ptrDevice->getDevice()->CreateRootSignature(NULL, sig->GetBufferPointer(), sig->GetBufferSize(), IID_PPV_ARGS(&m_ptrRootSig));
     COM_RELEASE(sig);
 
-    // === Create Vertex buffer ===
+    // == Create Vertex buffer
     // Describe heap
     D3D12_HEAP_PROPERTIES vbHeapProp;
     ZeroMemory(&vbHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
     vbHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-    vbHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN; // <<-- SPIELEN
-    vbHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN; // <-- Spielen
-    vbHeapProp.CreationNodeMask = NULL;
-    vbHeapProp.VisibleNodeMask = NULL;
+    vbHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    vbHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 
     // Describe Resource
     D3D12_RESOURCE_DESC vbDesk;
     ZeroMemory(&vbDesk, sizeof(D3D12_RESOURCE_DESC));
     vbDesk.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    vbDesk.Alignment = 0;
     vbDesk.Width = (sizeof(Vertex) * 3);
     vbDesk.Height = 1;
     vbDesk.DepthOrArraySize = 1;
@@ -73,7 +80,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     vbDesk.Format = DXGI_FORMAT_UNKNOWN;
     vbDesk.SampleDesc.Count = 1;
     vbDesk.SampleDesc.Quality = 0;
-    vbDesk.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR; // <-- Spielen
+    vbDesk.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     vbDesk.Flags = D3D12_RESOURCE_FLAG_NONE;
 
     // Create Vertex buffer
@@ -100,7 +107,6 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     D3D12_RESOURCE_DESC vbUploadDesk;
     ZeroMemory(&vbUploadDesk, sizeof(D3D12_RESOURCE_DESC));
     vbUploadDesk.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    vbUploadDesk.Alignment = 0;
     vbUploadDesk.Width = sizeof(Vertex) * 3;
     vbUploadDesk.Height = 1;
     vbUploadDesk.DepthOrArraySize = 1;
@@ -122,7 +128,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
         IID_PPV_ARGS(&ptrUploadBuffer)
     );
 
-    // == Upload Data ==
+    // == Upload Vertext Data
     // Map buffer to system memory
     void* mem;
     ptrUploadBuffer->Map(0, NULL, &mem);
@@ -136,7 +142,6 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     // Copy buffer
     m_ptrDevice->getCommandList()->CopyBufferRegion(m_ptrVertexBuffer, 0, ptrUploadBuffer, 0, sizeof(Vertex) * 3);
     
-
     // Set resource to read state
     D3D12_RESOURCE_BARRIER baToRead;
     baToRead.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -154,35 +159,43 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     // Free upload buffer
     COM_RELEASE(ptrUploadBuffer);
 
-    // == Create Vertex buffer view ==
+    // == Create Vertex buffer view
     ZeroMemory(&m_vertexBufferView, sizeof(D3D12_VERTEX_BUFFER_VIEW));
     m_vertexBufferView.BufferLocation = m_ptrVertexBuffer->GetGPUVirtualAddress();
     m_vertexBufferView.SizeInBytes = sizeof(Vertex) * 3;
     m_vertexBufferView.StrideInBytes = sizeof(Vertex);
 
-    // == Create PSO ===
+    // == Create PSO
+    
+    // Describe rasterizer
+    D3D12_RASTERIZER_DESC rasterizerDesk;
+    ZeroMemory(&rasterizerDesk, sizeof(D3D12_RASTERIZER_DESC));
+
+    rasterizerDesk.FillMode = D3D12_FILL_MODE_SOLID;
+    rasterizerDesk.CullMode = D3D12_CULL_MODE_NONE;
+    rasterizerDesk.DepthClipEnable = FALSE;
+    rasterizerDesk.FrontCounterClockwise = FALSE;
+    rasterizerDesk.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+    rasterizerDesk.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+    rasterizerDesk.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+    rasterizerDesk.MultisampleEnable = FALSE;
+    rasterizerDesk.AntialiasedLineEnable = FALSE;
+    rasterizerDesk.ForcedSampleCount = 0;
+    rasterizerDesk.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+    // Describe PSO
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesk;
     ZeroMemory(&psoDesk, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
-    // Describe
     psoDesk.pRootSignature = m_ptrRootSig;
     psoDesk.InputLayout.NumElements = 1;
     psoDesk.InputLayout.pInputElementDescs = m_inputDescVertex;
+    psoDesk.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesk.VS.BytecodeLength = m_ptrBlbVertex->GetBufferSize(); 
     psoDesk.VS.pShaderBytecode = m_ptrBlbVertex->GetBufferPointer();
     psoDesk.PS.BytecodeLength = m_ptrBlbPixel->GetBufferSize();
     psoDesk.PS.pShaderBytecode = m_ptrBlbPixel->GetBufferPointer();
-    psoDesk.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
-    psoDesk.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
-    psoDesk.RasterizerState.DepthClipEnable = FALSE;
-    psoDesk.RasterizerState.FrontCounterClockwise = FALSE;
-    psoDesk.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
-    psoDesk.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
-    psoDesk.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
-    psoDesk.RasterizerState.MultisampleEnable = FALSE;
-    psoDesk.RasterizerState.AntialiasedLineEnable = FALSE;
-    psoDesk.RasterizerState.ForcedSampleCount = 0;
-    psoDesk.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+    psoDesk.RasterizerState = rasterizerDesk;
     psoDesk.BlendState.AlphaToCoverageEnable = FALSE;
     psoDesk.BlendState.IndependentBlendEnable = FALSE;
     psoDesk.BlendState.RenderTarget[0] = {
@@ -198,10 +211,11 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     psoDesk.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
     psoDesk.SampleDesc.Count = 1;
     psoDesk.SampleDesc.Quality = 0;
-    psoDesk.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
     // Create
     m_ptrDevice->getDevice()->CreateGraphicsPipelineState(&psoDesk, IID_PPV_ARGS(&m_ptrPso));
+
+    // ===========================
 
     return S_OK;
 }
@@ -210,13 +224,13 @@ HRESULT MY::Game::Loop(){
     // Begin frame
     static FLOAT m_clearColor[4] = { 0.388f, 0.733f, 0.949f, 1.0f };
     m_ptrSwapChain->beginFrame(m_ptrDevice, m_clearColor);
-    m_ptrView->bind(m_ptrDevice);
+    m_ptrView->bind(m_ptrDevice);       // <-- Letzes mal vergessen!
 
-    // TODO: Insert rendering code
+    // === VIDEO 4 ===
 
     // Set PSO
-    m_ptrDevice->getCommandList()->SetGraphicsRootSignature(m_ptrRootSig);
     m_ptrDevice->getCommandList()->IASetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_ptrDevice->getCommandList()->SetGraphicsRootSignature(m_ptrRootSig);
     m_ptrDevice->getCommandList()->SetPipelineState(m_ptrPso);
 
     // Bind vertex buffer
@@ -224,6 +238,8 @@ HRESULT MY::Game::Loop(){
 
     // Draw
     m_ptrDevice->getCommandList()->DrawInstanced(3, 1, 0, 0);
+
+    // ====================
 
     // End frame
     m_ptrSwapChain->endFrame(m_ptrDevice);
@@ -236,13 +252,14 @@ HRESULT MY::Game::Loop(){
 }
 
 HRESULT MY::Game::Shutdown(){
-    // Test shutdown
+    // === VIDEO 4 ===
     COM_RELEASE(m_ptrRootSig)
     COM_RELEASE(m_ptrPso);
     COM_RELEASE(m_ptrBlbPixel);
     COM_RELEASE(m_ptrBlbVertex);
     COM_RELEASE(m_ptrVertexBuffer);
-    
+    // ================
+
     // Shutdown members
     m_ptrSwapChain->Shutdown();
     m_ptrDevice->Shutdown();
