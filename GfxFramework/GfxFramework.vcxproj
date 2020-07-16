@@ -97,8 +97,10 @@
     <ClCompile Include="src\Application\Flow.cpp" />
     <ClCompile Include="src\Game\Game.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_Device.cpp" />
+    <ClCompile Include="src\Graffics\DirectXContext\d3d_psoFactory.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_SwapChain.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_View.cpp" />
+    <ClCompile Include="src\Loading\Blobs\d3dBlogLoader.cpp" />
     <ClCompile Include="src\WindowFramework\Window.cpp" />
     <ClCompile Include="src\WindowFramework\WindowProc.cpp" />
     <ClCompile Include="src\WinMain.cpp" />
@@ -107,10 +109,13 @@
     <ClInclude Include="src\Application\App.h" />
     <ClInclude Include="src\Application\Flow.h" />
     <ClInclude Include="src\Game\Game.h" />
+    <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_FixedUploadBuffer.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_Device.h" />
+    <ClInclude Include="src\Graffics\DirectXContext\d3d_psoFactory.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_SwapChain.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_View.h" />
     <ClInclude Include="src\Graffics\gfxCommon.h" />
+    <ClInclude Include="src\Loading\Blobs\d3dBlogLoader.h" />
     <ClInclude Include="src\WindowFramework\IMessageReciver.h" />
     <ClInclude Include="src\WindowFramework\Window.h" />
     <ClInclude Include="src\WindowFramework\WindowProc.h" />

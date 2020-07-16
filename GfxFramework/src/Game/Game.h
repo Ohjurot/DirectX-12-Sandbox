@@ -11,6 +11,10 @@
 #include <Graffics/DirectXContext/d3d_Device.h>
 #include <Graffics/DirectXContext/d3d_SwapChain.h>
 #include <Graffics/DirectXContext/d3d_View.h>
+#include <Graffics/DirectXContext/d3d_psoFactory.h>
+#include <Graffics/DirectXContext/Buffers/d3d_FixedUploadBuffer.h>
+
+#include <Loading/Blobs/d3dBlogLoader.h>
 
 namespace MY {
 	class Game : public Application::GfxApp {
@@ -37,6 +41,9 @@ namespace MY {
 
 		private:
 			// === VIDEO 4 ===
+
+			// Upload buffer
+			D3D::FixedUploadBuffer<128> m_uploadBuffer;
 
 			// Pipline state Object for drawing
 			ID3D12PipelineState* m_ptrPso = NULL;
@@ -66,7 +73,7 @@ namespace MY {
 			CBuffer m_cpuConstBuffer;
 			
 			// Vertex input layout descriptor
-			const D3D12_INPUT_ELEMENT_DESC m_inputDescVertex[2] = {
+			D3D12_INPUT_ELEMENT_DESC m_inputDescVertex[2] = {
 				// SemanticName,	Semantic Index,	Format,							InputSlot,	ByteOffset,	InputSlotClass,								InstanceDataStepRate
 				{"POSITION",		0,				DXGI_FORMAT_R32G32_FLOAT,		0,			0,			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 				{"COLOR",			0,				DXGI_FORMAT_R32G32B32_FLOAT,	0,			8,			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}

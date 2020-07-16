@@ -39,6 +39,12 @@
     <ClCompile Include="src\Game\Game.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\Loading\Blobs\d3dBlogLoader.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graffics\DirectXContext\d3d_psoFactory.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\WindowFramework\WindowProc.h">
@@ -69,6 +75,15 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Game\Game.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Loading\Blobs\d3dBlogLoader.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_FixedUploadBuffer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\DirectXContext\d3d_psoFactory.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
