@@ -30,7 +30,7 @@ namespace D3D {
 
 			// Ordered access
 			BOOL dispatchCommandList();
-			VOID waitForCommandListAndRest(ID3D12PipelineState* ptrPso = NULL);
+			VOID waitForCommandListAndReset(ID3D12PipelineState* ptrPso = NULL);
 
 		private:
 			// Device

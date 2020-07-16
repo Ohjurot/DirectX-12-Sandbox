@@ -136,7 +136,7 @@ BOOL D3D::Device::dispatchCommandList(){
 	return TRUE;
 }
 
-VOID D3D::Device::waitForCommandListAndRest(ID3D12PipelineState* ptrPso){
+VOID D3D::Device::waitForCommandListAndReset(ID3D12PipelineState* ptrPso){
 	// Check if windows event hanlde is required (que still running)
 	if (m_ptrFence->GetCompletedValue() < m_uiFenceVal) {
 		// Create event handle

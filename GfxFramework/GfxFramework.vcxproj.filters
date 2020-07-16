@@ -72,4 +72,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="src\Shader\SimpleVS.hlsl" />
+    <FxCompile Include="src\Shader\SimplePS.hlsl" />
+    <FxCompile Include="src\Shader\RootSignature.hlsl" />
+  </ItemGroup>
 </Project>
