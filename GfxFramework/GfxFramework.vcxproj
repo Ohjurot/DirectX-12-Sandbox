@@ -111,10 +111,12 @@
     <ClInclude Include="src\Application\Flow.h" />
     <ClInclude Include="src\Game\Game.h" />
     <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_FixedUploadBuffer.h" />
+    <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_VariableUploadBuffer.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_Device.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_psoFactory.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_SwapChain.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_View.h" />
+    <ClInclude Include="src\Graffics\DirectXContext\Texture\d3d_TextureUploader.h" />
     <ClInclude Include="src\Graffics\gfxCommon.h" />
     <ClInclude Include="src\Loading\Blobs\d3dBlogLoader.h" />
     <ClInclude Include="src\Loading\Images\WIC_ImageLoader.h" />

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <d3d12.h>
-#include <d3dcompiler.h>s
+#include <d3dcompiler.h>
 
 #include <Graffics/gfxCommon.h>
 #include <Graffics/DirectXContext/d3d_Device.h>

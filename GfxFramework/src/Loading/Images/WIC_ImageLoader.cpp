@@ -129,7 +129,7 @@ std::vector<Util::TexureLoader::WicDx> Util::TexureLoader::s_FormateConversionDx
     // =======================================================================================================================
 };
 
-HRESULT Util::TexureLoader::fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrDevice, void** ppMemory, SIZE_T* pSize, DXGI_FORMAT* ptrResultFormat) {
+HRESULT Util::TexureLoader::fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrDevice, void** ppMemory, SIZE_T* pSize, UINT* pWidth, UINT* pHeight, DXGI_FORMAT* ptrResultFormat) {
     HRESULT hr;
 
     // Create wic factory
@@ -262,12 +262,12 @@ HRESULT Util::TexureLoader::fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrD
 
     // Tempory memory allocation
     UINT rowPitch = (width * uiBitsPerPixel + 7) / 8;
-    SIZE_T imageSize = rowPitch * height;
+    SIZE_T imageSize = (SIZE_T)rowPitch * (SIZE_T)height;
     void* workMemory = malloc(imageSize);
 
     // Check if direct copy is possible
     if (memcmp(&frameNativeFormat, &targetFormat, sizeof(GUID)) == 0) {
-        if (FAILED(hr = ptrFrameDecoder->CopyPixels(NULL, rowPitch, imageSize, (BYTE*)workMemory))) {
+        if (FAILED(hr = ptrFrameDecoder->CopyPixels(NULL, rowPitch, (UINT)imageSize, (BYTE*)workMemory))) {
             COM_RELEASE(ptrFrameDecoder);
             COM_RELEASE(ptrDecoder);
             COM_RELEASE(ptrFactory);
@@ -292,7 +292,7 @@ HRESULT Util::TexureLoader::fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrD
             return hr;
         }
         
-        if (FAILED(hr = ptrFormatConverter->CopyPixels(NULL, rowPitch, imageSize, (BYTE*)workMemory))) {
+        if (FAILED(hr = ptrFormatConverter->CopyPixels(NULL, rowPitch, (UINT)imageSize, (BYTE*)workMemory))) {
             COM_RELEASE(ptrFormatConverter);
             COM_RELEASE(ptrFrameDecoder);
             COM_RELEASE(ptrDecoder);
@@ -307,6 +307,8 @@ HRESULT Util::TexureLoader::fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrD
     *ppMemory = workMemory;
     *ptrResultFormat = targetFormatDx;
     *pSize = imageSize;
+    *pWidth = width;
+    *pHeight = height;
 
     // Release Objects
     COM_RELEASE(ptrFrameDecoder);

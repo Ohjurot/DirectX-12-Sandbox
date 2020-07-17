@@ -6,16 +6,18 @@
 #include <Graffics/DirectXContext/d3d_Device.h>
 
 namespace D3D {
-	template<UINT bufferSize>
-	class FixedUploadBuffer {
+	class VariableUploadBuffer {
 		public:
-			~FixedUploadBuffer() {
+			~VariableUploadBuffer() {
 				COM_RELEASE(m_ptrUploadBuffer);
 			}
 
 			HRESULT setBuffer(D3D::Device* ptrDevice, ID3D12Resource* ptrTargetBuffer, D3D12_RESOURCE_STATES currentState, void* srcData, UINT offsetInTarget, UINT copySize) {
 				// Check if buffer creation is needed
-				if (!m_ptrUploadBuffer) {
+				if (!m_ptrUploadBuffer || copySize > m_bufferSize) {
+					COM_RELEASE(m_ptrUploadBuffer);
+					m_bufferSize = copySize;
+
 					// Describe Upload heap
 					D3D12_HEAP_PROPERTIES uplHeapProp;
 					ZeroMemory(&uplHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
@@ -29,7 +31,7 @@ namespace D3D {
 					D3D12_RESOURCE_DESC uplHeapDesc;
 					ZeroMemory(&uplHeapDesc, sizeof(D3D12_RESOURCE_DESC));
 					uplHeapDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-					uplHeapDesc.Width = bufferSize;
+					uplHeapDesc.Width = m_bufferSize;
 					uplHeapDesc.Height = 1;
 					uplHeapDesc.DepthOrArraySize = 1;
 					uplHeapDesc.MipLevels = 1;
@@ -53,11 +55,6 @@ namespace D3D {
 					if (FAILED(hr)) {
 						return hr;
 					}
-				}
-
-				// Check size
-				if (copySize > bufferSize) {
-					return ERROR_INVALID_USER_BUFFER;
 				}
 
 				// Map local buffer
@@ -93,12 +90,10 @@ namespace D3D {
 				toOldState.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
 				toOldState.Transition.StateAfter = currentState;
 				ptrDevice->getCommandList()->ResourceBarrier(1, &toOldState);
-				
+
 				// Execute
 				ptrDevice->dispatchCommandList();
 				ptrDevice->waitForCommandListAndReset();
-
-				return S_OK;
 			}
 
 			VOID preDestructDestroy() {
@@ -107,5 +102,6 @@ namespace D3D {
 
 		private:
 			ID3D12Resource* m_ptrUploadBuffer = NULL;
+			UINT m_bufferSize = 0;
 	};
 }

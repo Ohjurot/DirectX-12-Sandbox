@@ -92,6 +92,12 @@
     <ClInclude Include="src\Loading\Images\WIC_ImageLoader.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_VariableUploadBuffer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\DirectXContext\Texture\d3d_TextureUploader.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="src\Shader\SimpleVS.hlsl" />

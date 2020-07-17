@@ -9,14 +9,14 @@ struct cBuf
 struct sOut
 {
 	float4 pos : SV_Position;
-	float3 color : COLOR;
+    float2 tex : TEXTCORDS;
 };
 
 ConstantBuffer<cBuf> genericBuffer : register(b0);
 
 [RootSignature(MyRS)]
-void main(float2 pos : POSITION, float3 color : COLOR, out sOut outData)
+void main(float2 pos : POSITION, float2 tex : TEXTCORDS, out sOut outData)
 {
 	outData.pos = mul(mul(float4(pos, 0.0f, 1.0f), genericBuffer.matTranform), genericBuffer.matView);
-	outData.color = color;
+	outData.tex = tex;
 }

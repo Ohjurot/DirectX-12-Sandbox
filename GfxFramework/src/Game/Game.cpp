@@ -123,9 +123,84 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
     // == Create texture
     void* memTex = nullptr;
-    SIZE_T size = 0;
-    DXGI_FORMAT textureFormat;
-    COM_CREATE_HR_RETURN(hr, Util::TexureLoader::fromFileToMemory(L"./texture.png", m_ptrDevice, &memTex, &size, &textureFormat));
+    SIZE_T sizeBytes = 0;
+    UINT texWidth, texHeight;
+    DXGI_FORMAT texFormat;
+    COM_CREATE_HR_RETURN(hr, Util::TexureLoader::fromFileToMemory(L"./texture.png", m_ptrDevice, &memTex, &sizeBytes, &texWidth, &texHeight, &texFormat));
+    assert(memTex);
+
+    // Heap
+    D3D12_HEAP_PROPERTIES txHeapProp;
+    ZeroMemory(&vbHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
+    txHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
+    txHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    txHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    txHeapProp.CreationNodeMask = NULL;
+    txHeapProp.VisibleNodeMask = NULL;
+
+    // Describe Resource
+    D3D12_RESOURCE_DESC txDesk;
+    ZeroMemory(&cbDesk, sizeof(D3D12_RESOURCE_DESC));
+    txDesk.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    txDesk.Width = texWidth;
+    txDesk.Height = texHeight;
+    txDesk.Alignment = 0;
+    txDesk.DepthOrArraySize = 1;
+    txDesk.MipLevels = 1;
+    txDesk.Format = texFormat;
+    txDesk.SampleDesc.Count = 1;
+    txDesk.SampleDesc.Quality = 0;
+    txDesk.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    txDesk.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+    // Create texture
+    hr = m_ptrDevice->getDevice()->CreateCommittedResource(
+        &txHeapProp,
+        D3D12_HEAP_FLAG_NONE,
+        &txDesk,
+        D3D12_RESOURCE_STATE_COMMON,
+        NULL,
+        IID_PPV_ARGS(&m_ptrTexture)
+    );
+
+    // Copy
+    D3D::TextureUploader upBuffer;
+    if (!FAILED(hr)) {
+        hr = upBuffer.setBuffer(m_ptrDevice, m_ptrTexture, D3D12_RESOURCE_STATE_COMMON, memTex, texWidth, texHeight, texFormat, sizeBytes);
+    }
+    upBuffer.preDestructDestroy();
+
+    // Free temporary memory texture
+    if(memTex) {
+        free(memTex);
+    }
+
+    // Return here to make shure free(...) is called
+    if (FAILED(hr)) {
+        return hr;
+    }
+
+    // == SRV (For Texture)
+    // Heap
+    D3D12_DESCRIPTOR_HEAP_DESC hpRtHeapDesk;
+    hpRtHeapDesk.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    hpRtHeapDesk.NumDescriptors = 1;
+    hpRtHeapDesk.NodeMask = NULL;
+    hpRtHeapDesk.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+    COM_CREATE_HR_RETURN(hr, m_ptrDevice->getDevice()->CreateDescriptorHeap(&hpRtHeapDesk, IID_PPV_ARGS(&m_ptrHeapRootTable)));
+
+    // Descriptor
+    D3D12_SHADER_RESOURCE_VIEW_DESC rvDesk;
+    rvDesk.Format = texFormat;
+    rvDesk.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    rvDesk.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    rvDesk.Texture2D.MipLevels = 1;
+    rvDesk.Texture2D.MostDetailedMip = 0;
+    rvDesk.Texture2D.PlaneSlice = 0;
+    rvDesk.Texture2D.ResourceMinLODClamp = 0.0f;
+
+    m_ptrDevice->getDevice()->CreateShaderResourceView(m_ptrTexture, &rvDesk, m_ptrHeapRootTable->GetCPUDescriptorHandleForHeapStart());
 
     // == Create PSO
     COM_CREATE_HR_RETURN(hr, D3D::PSOFactory::createPso(m_ptrDevice, &m_ptrPso, m_ptrBlbVertex, m_ptrBlbPixel, m_ptrRootSig, 2, m_inputDescVertex));
@@ -137,9 +212,9 @@ HRESULT MY::Game::Loop(){
     // ### Logic: Update CBuffer
     static float angel = 0.0f;
     if (m_ptrWindow->isKeyDown(VK_SPACE)) {
-        angel += 0.01f;
+        angel += 0.005f;
 
-        if (angel > DirectX::XM_PI * 2) angel -= DirectX::XM_PI * 2;
+        if (angel >= DirectX::XM_PI * 2) angel -= DirectX::XM_PI * 2;
 
         m_cpuConstBuffer.matTransform = DirectX::XMMatrixRotationZ(angel);
         m_uploadBuffer.setBuffer(m_ptrDevice, m_ptrConstBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, &m_cpuConstBuffer, 0, sizeof(CBuffer));
@@ -161,6 +236,13 @@ HRESULT MY::Game::Loop(){
     // Bind constant buffer
     m_ptrDevice->getCommandList()->SetGraphicsRootConstantBufferView(0, m_constBufferView.BufferLocation);
 
+    // Bind texture
+    ID3D12DescriptorHeap* arr[] = {
+        m_ptrHeapRootTable
+    };
+    m_ptrDevice->getCommandList()->SetDescriptorHeaps(1, arr);
+    m_ptrDevice->getCommandList()->SetGraphicsRootDescriptorTable(1, m_ptrHeapRootTable->GetGPUDescriptorHandleForHeapStart());
+
     // Draw
     m_ptrDevice->getCommandList()->DrawInstanced(3, 1, 0, 0);
 
@@ -178,6 +260,8 @@ HRESULT MY::Game::Loop(){
 HRESULT MY::Game::Shutdown(){
     // === VIDEO 4 ===
     m_uploadBuffer.preDestructDestroy();
+    COM_RELEASE(m_ptrHeapRootTable);
+    COM_RELEASE(m_ptrTexture);
     COM_RELEASE(m_ptrConstBuffer);
     COM_RELEASE(m_ptrRootSig)
     COM_RELEASE(m_ptrPso);

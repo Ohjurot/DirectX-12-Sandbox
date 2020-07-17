@@ -2,10 +2,13 @@
 
 struct dIn{
 	float4 pos : SV_Position;
-	float3 color : COLOR;
+    float2 tex : TEXTCORDS;
 };
+
+Texture2D tex : register(t0);
+sampler smp : register(s0);
 
 [RootSignature(MyRS)]
 float4 main(dIn data) : SV_TARGET{
-	return float4(data.color, 1.0f);
+    return tex.Sample(smp, data.tex);
 }
