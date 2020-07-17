@@ -15,6 +15,7 @@
 #include <Graffics/DirectXContext/Buffers/d3d_FixedUploadBuffer.h>
 
 #include <Loading/Blobs/d3dBlogLoader.h>
+#include <Loading/Images/WIC_ImageLoader.h>
 
 namespace MY {
 	class Game : public Application::GfxApp {

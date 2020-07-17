@@ -1,11 +1,17 @@
 #include "Flow.h"
 
 HRESULT Application::Flow::Begin(Meta* ptrAppMeta){
+    HRESULT hr;
+
+    // Coinit
+    if (FAILED(hr = CoInitialize(NULL))) {
+        return hr;
+    }
+    
     // Create Window
     WF::Window wnd(ptrAppMeta->name, 100, 100, ptrAppMeta->clientWidth, ptrAppMeta->clientHeight);
 
     // Init app
-    HRESULT hr;
     if (FAILED(hr = ptrAppMeta->entryPoint->Init(&wnd, ptrAppMeta->clientWidth, ptrAppMeta->clientHeight))) {
         return hr;
     }
@@ -22,5 +28,6 @@ HRESULT Application::Flow::Begin(Meta* ptrAppMeta){
     }
 
     // Shutdown
+    CoUninitialize();
     return ptrAppMeta->entryPoint->Shutdown();
 }

@@ -121,6 +121,11 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     // Copy buffer
     COM_CREATE_HR_RETURN(hr, m_uploadBuffer.setBuffer(m_ptrDevice, m_ptrConstBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, &m_cpuConstBuffer, 0, sizeof(CBuffer)));
 
+    // == Create texture
+    void* memTex = nullptr;
+    SIZE_T size = 0;
+    DXGI_FORMAT textureFormat;
+    COM_CREATE_HR_RETURN(hr, Util::TexureLoader::fromFileToMemory(L"./texture.png", m_ptrDevice, &memTex, &size, &textureFormat));
 
     // == Create PSO
     COM_CREATE_HR_RETURN(hr, D3D::PSOFactory::createPso(m_ptrDevice, &m_ptrPso, m_ptrBlbVertex, m_ptrBlbPixel, m_ptrRootSig, 2, m_inputDescVertex));

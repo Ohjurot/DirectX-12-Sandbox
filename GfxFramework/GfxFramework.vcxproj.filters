@@ -45,6 +45,9 @@
     <ClCompile Include="src\Graffics\DirectXContext\d3d_psoFactory.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\Loading\Images\WIC_ImageLoader.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\WindowFramework\WindowProc.h">
@@ -84,6 +87,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Graffics\DirectXContext\d3d_psoFactory.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Loading\Images\WIC_ImageLoader.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
