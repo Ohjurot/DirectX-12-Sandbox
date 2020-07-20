@@ -19,6 +19,8 @@
 #include <Loading/Blobs/d3dBlogLoader.h>
 #include <Loading/Images/WIC_ImageLoader.h>
 
+#include <Graffics/Infrastruktur/ShaderRegistry.h>
+
 namespace MY {
 	class Game : public Application::GfxApp {
 		public:
@@ -50,10 +52,6 @@ namespace MY {
 
 			// Pipline state Object for drawing
 			ID3D12PipelineState* m_ptrPso = NULL;
-
-			// Blobs for shaders
-			ID3DBlob* m_ptrBlbVertex = NULL;
-			ID3DBlob* m_ptrBlbPixel = NULL;
 			
 			// Root signatures
 			ID3D12RootSignature* m_ptrRootSig = NULL;

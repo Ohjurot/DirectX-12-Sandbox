@@ -1,8 +1,22 @@
 #include "d3d_psoFactory.h"
 
-HRESULT D3D::PSOFactory::createPso(D3D::Device* ptrDevice, ID3D12PipelineState** ppPso, ID3DBlob* ptrVertexShader, ID3DBlob* ptrPixelShader, 
+HRESULT D3D::PSOFactory::createPso(D3D::Device* ptrDevice, ID3D12PipelineState** ppPso, INT idVertexShader, INT idPixelShader,
     ID3D12RootSignature* ptrRootSignature, UINT numInputElements, D3D12_INPUT_ELEMENT_DESC* ptrInputElements, D3D12_CULL_MODE cullMode, D3D12_FILL_MODE fillMode){
     
+    // Load shaders
+    IF3D12::Shader* ptrVertexShader = nullptr;
+    IF3D12::ShaderRegistry::getRegistry()->getShader(idVertexShader, &ptrVertexShader);
+    if (!ptrVertexShader) {
+        return E_FAIL;
+    }
+
+    IF3D12::Shader* ptrPixelShader = nullptr;
+    IF3D12::ShaderRegistry::getRegistry()->getShader(idPixelShader, &ptrPixelShader);
+    if (!ptrPixelShader) {
+        return E_FAIL;
+    }
+
+
     // Describe rasterizer
     D3D12_RASTERIZER_DESC rasterizerDesk;
     ZeroMemory(&rasterizerDesk, sizeof(D3D12_RASTERIZER_DESC));
@@ -27,10 +41,10 @@ HRESULT D3D::PSOFactory::createPso(D3D::Device* ptrDevice, ID3D12PipelineState**
     psoDesk.InputLayout.NumElements = numInputElements;
     psoDesk.InputLayout.pInputElementDescs = ptrInputElements;
     psoDesk.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    psoDesk.VS.BytecodeLength = ptrVertexShader->GetBufferSize();
-    psoDesk.VS.pShaderBytecode = ptrVertexShader->GetBufferPointer();
-    psoDesk.PS.BytecodeLength = ptrPixelShader->GetBufferSize();
-    psoDesk.PS.pShaderBytecode = ptrPixelShader->GetBufferPointer();
+    psoDesk.VS.BytecodeLength = ptrVertexShader->size;
+    psoDesk.VS.pShaderBytecode = ptrVertexShader->ptrData;
+    psoDesk.PS.BytecodeLength = ptrPixelShader->size;
+    psoDesk.PS.pShaderBytecode = ptrPixelShader->ptrData;
     psoDesk.RasterizerState = rasterizerDesk;
     psoDesk.BlendState.AlphaToCoverageEnable = FALSE;
     psoDesk.BlendState.IndependentBlendEnable = FALSE;

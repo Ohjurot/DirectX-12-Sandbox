@@ -100,6 +100,7 @@
     <ClCompile Include="src\Graffics\DirectXContext\d3d_psoFactory.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_SwapChain.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_View.cpp" />
+    <ClCompile Include="src\Graffics\Infrastruktur\ShaderRegistry.cpp" />
     <ClCompile Include="src\Loading\Blobs\d3dBlogLoader.cpp" />
     <ClCompile Include="src\Loading\Images\WIC_ImageLoader.cpp" />
     <ClCompile Include="src\WindowFramework\Window.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="src\Graffics\DirectXContext\d3d_View.h" />
     <ClInclude Include="src\Graffics\DirectXContext\Texture\d3d_TextureUploader.h" />
     <ClInclude Include="src\Graffics\gfxCommon.h" />
+    <ClInclude Include="src\Graffics\Infrastruktur\ShaderRegistry.h" />
     <ClInclude Include="src\Loading\Blobs\d3dBlogLoader.h" />
     <ClInclude Include="src\Loading\Images\WIC_ImageLoader.h" />
     <ClInclude Include="src\WindowFramework\IMessageReciver.h" />
@@ -136,12 +138,16 @@
       </AssemblerOutputFile>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MyRS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">rootsig_1.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="src\Shader\SimplePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="src\Shader\SimpleVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -154,6 +160,8 @@
       <AssemblerOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AssemblerOutputFile>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

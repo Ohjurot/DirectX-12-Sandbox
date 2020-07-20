@@ -25,15 +25,19 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     
 
     // == Load Shaders
-    COM_CREATE_HR_RETURN(hr, Util::BlobLoader::loadBlob(L"./SimpleVS.cso", &m_ptrBlbVertex));
-    COM_CREATE_HR_RETURN(hr, Util::BlobLoader::loadBlob(L"./SimplePS.cso", &m_ptrBlbPixel));
+    IF3D12::Shader* ptrShaderRootSig;
+    UINT idVs = IF3D12::ShaderRegistry::getRegistry()->getShader(L"SimpleVS.cso");
+    UINT idPs = IF3D12::ShaderRegistry::getRegistry()->getShader(L"SimplePS.cso");
+    UINT idRs = IF3D12::ShaderRegistry::getRegistry()->getShader(L"RootSignature.cso");
+    
+    if (idVs < 0 || idPs < 0 || idRs < 0) {
+        COM_CREATE_HR_RETURN(hr, ERROR_FILE_NOT_FOUND);
+    }
 
+    IF3D12::ShaderRegistry::getRegistry()->getShader(idRs, &ptrShaderRootSig);
 
-    // == Load Root signature blob and create root signature from it
-    ID3D10Blob* sig = NULL;
-    COM_CREATE_HR_RETURN(hr, Util::BlobLoader::loadBlob(L"./RootSignature.cso", &sig));
-    COM_CREATE_HR_RETURN(hr, m_ptrDevice->getDevice()->CreateRootSignature(NULL, sig->GetBufferPointer(), sig->GetBufferSize(), IID_PPV_ARGS(&m_ptrRootSig)));
-    COM_RELEASE(sig);
+    // == Create root sig
+    COM_CREATE_HR_RETURN(hr, m_ptrDevice->getDevice()->CreateRootSignature(NULL, ptrShaderRootSig->ptrData, ptrShaderRootSig->size, IID_PPV_ARGS(&m_ptrRootSig)));
 
 
     // == Create Vertex buffer
@@ -203,7 +207,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     m_ptrDevice->getDevice()->CreateShaderResourceView(m_ptrTexture, &rvDesk, m_ptrHeapRootTable->GetCPUDescriptorHandleForHeapStart());
 
     // == Create PSO
-    COM_CREATE_HR_RETURN(hr, D3D::PSOFactory::createPso(m_ptrDevice, &m_ptrPso, m_ptrBlbVertex, m_ptrBlbPixel, m_ptrRootSig, 2, m_inputDescVertex));
+    COM_CREATE_HR_RETURN(hr, D3D::PSOFactory::createPso(m_ptrDevice, &m_ptrPso, idVs, idPs, m_ptrRootSig, 2, m_inputDescVertex));
 
     return S_OK;
 }
@@ -265,8 +269,6 @@ HRESULT MY::Game::Shutdown(){
     COM_RELEASE(m_ptrConstBuffer);
     COM_RELEASE(m_ptrRootSig)
     COM_RELEASE(m_ptrPso);
-    COM_RELEASE(m_ptrBlbPixel);
-    COM_RELEASE(m_ptrBlbVertex);
     COM_RELEASE(m_ptrVertexBuffer);
     // ================
 

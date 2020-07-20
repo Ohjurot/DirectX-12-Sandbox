@@ -48,6 +48,9 @@
     <ClCompile Include="src\Loading\Images\WIC_ImageLoader.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graffics\Infrastruktur\ShaderRegistry.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\WindowFramework\WindowProc.h">
@@ -96,6 +99,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Graffics\DirectXContext\Texture\d3d_TextureUploader.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\Infrastruktur\ShaderRegistry.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
