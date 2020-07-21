@@ -51,6 +51,9 @@
     <ClCompile Include="src\Graffics\Infrastruktur\DrawDescriptor.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graffics\Infrastruktur\Modell\VertexLayout.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\WindowFramework\WindowProc.h">
@@ -102,6 +105,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Graffics\Infrastruktur\DrawDescriptor.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\Infrastruktur\Modell\VertexLayout.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

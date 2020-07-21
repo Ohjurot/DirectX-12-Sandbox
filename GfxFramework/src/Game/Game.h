@@ -20,6 +20,7 @@
 
 #include <Graffics/Infrastruktur/ShaderRegistry.h>
 #include <Graffics/Infrastruktur/DrawDescriptor.h>
+#include <Graffics/Infrastruktur/Modell/VertexLayout.h>
 
 namespace MY {
 	class Game : public Application::GfxApp {
@@ -78,11 +79,7 @@ namespace MY {
 			CBuffer m_cpuConstBuffer;
 			
 			// Vertex input layout descriptor
-			D3D12_INPUT_ELEMENT_DESC m_inputDescVertex[2] = {
-				// SemanticName,	Semantic Index,	Format,							InputSlot,	ByteOffset,	InputSlotClass,								InstanceDataStepRate
-				{"POSITION",		0,				DXGI_FORMAT_R32G32_FLOAT,		0,			0,			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-				{"TEXTCORDS",		0,				DXGI_FORMAT_R32G32_FLOAT,		0,			8,			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
-			};
+			IF3D12::VertexLayout m_inputLayout;
 
 			// =============================
 

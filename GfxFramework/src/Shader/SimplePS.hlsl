@@ -6,7 +6,7 @@ struct dIn
     float2 tex : TEXTCORDS;
 };
 
-Texture2D tex : register(t0);
+Texture2D tex : register(t1);
 sampler smp : register(s0);
 
 [RootSignature(MyRS)]

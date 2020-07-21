@@ -29,6 +29,14 @@ HRESULT IF3D12::DrawPipelineDescriptor::makePso(ID3D12Device* ptrDevice, ID3D12P
         }
     }
 
+    // Get Size
+    if (ptrDescriptor->ptrLayout->getCommitSize() == 0) {
+        return E_NOT_SUFFICIENT_BUFFER;
+    }
+
+    // Commit
+    ptrDescriptor->ptrLayout->commitChanges();
+
     // Describe rasterizer
     D3D12_RASTERIZER_DESC rasterizerDesk;
     ZeroMemory(&rasterizerDesk, sizeof(D3D12_RASTERIZER_DESC));
@@ -50,8 +58,8 @@ HRESULT IF3D12::DrawPipelineDescriptor::makePso(ID3D12Device* ptrDevice, ID3D12P
     ZeroMemory(&psoDesk, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
     psoDesk.pRootSignature = *ppRootSignature;
-    psoDesk.InputLayout.NumElements = ptrDescriptor->inputLayoutElementCount;
-    psoDesk.InputLayout.pInputElementDescs = ptrDescriptor->ptrInputLayout;
+    psoDesk.InputLayout.NumElements = ptrDescriptor->ptrLayout->getCommitSize();
+    psoDesk.InputLayout.pInputElementDescs = ptrDescriptor->ptrLayout->getPointer();
     psoDesk.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesk.VS.BytecodeLength = ptrVertexShader->size;
     psoDesk.VS.pShaderBytecode = ptrVertexShader->ptrData;

@@ -34,6 +34,10 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
         COM_CREATE_HR_RETURN(hr, ERROR_FILE_NOT_FOUND);
     }
 
+    // == Input layout
+    m_inputLayout.appendElement({ IF3D12::VertexInputType::FLOAT2, "POSITION" });
+    m_inputLayout.appendElement({ IF3D12::VertexInputType::FLOAT2, "TEXTCORDS" });
+
     // == Create Vertex buffer
     // Describe heap
     D3D12_HEAP_PROPERTIES vbHeapProp;
@@ -206,8 +210,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
     descriptor.cullMode = D3D12_CULL_MODE_NONE;
     descriptor.fillMode = D3D12_FILL_MODE_SOLID;
-    descriptor.inputLayoutElementCount = 2;
-    descriptor.ptrInputLayout = m_inputDescVertex;
+    descriptor.ptrLayout = &m_inputLayout;
     descriptor.rootSignatureId = idRs;
     descriptor.shaders.idVertex = idVs;
     descriptor.shaders.idPixel = idPs;
