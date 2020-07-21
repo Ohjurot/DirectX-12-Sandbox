@@ -34,12 +34,6 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
         COM_CREATE_HR_RETURN(hr, ERROR_FILE_NOT_FOUND);
     }
 
-    IF3D12::ShaderRegistry::getRegistry()->getShader(idRs, &ptrShaderRootSig);
-
-    // == Create root sig
-    COM_CREATE_HR_RETURN(hr, m_ptrDevice->getDevice()->CreateRootSignature(NULL, ptrShaderRootSig->ptrData, ptrShaderRootSig->size, IID_PPV_ARGS(&m_ptrRootSig)));
-
-
     // == Create Vertex buffer
     // Describe heap
     D3D12_HEAP_PROPERTIES vbHeapProp;
@@ -207,7 +201,17 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     m_ptrDevice->getDevice()->CreateShaderResourceView(m_ptrTexture, &rvDesk, m_ptrHeapRootTable->GetCPUDescriptorHandleForHeapStart());
 
     // == Create PSO
-    COM_CREATE_HR_RETURN(hr, D3D::PSOFactory::createPso(m_ptrDevice, &m_ptrPso, idVs, idPs, m_ptrRootSig, 2, m_inputDescVertex));
+    IF3D12::DrawPipelineDescriptor descriptor;
+    ZeroMemory(&descriptor, sizeof(IF3D12::DrawPipelineDescriptor));
+
+    descriptor.cullMode = D3D12_CULL_MODE_NONE;
+    descriptor.fillMode = D3D12_FILL_MODE_SOLID;
+    descriptor.inputLayoutElementCount = 2;
+    descriptor.ptrInputLayout = m_inputDescVertex;
+    descriptor.rootSignatureId = idRs;
+    descriptor.shaders.idVertex = idVs;
+    descriptor.shaders.idPixel = idPs;
+    COM_CREATE_HR_RETURN(hr, IF3D12::DrawPipelineDescriptor::makePso(m_ptrDevice->getDevice(), &m_ptrPso, &m_ptrRootSig, -1, &descriptor));
 
     return S_OK;
 }

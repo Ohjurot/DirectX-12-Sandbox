@@ -42,13 +42,13 @@
     <ClCompile Include="src\Loading\Blobs\d3dBlogLoader.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graffics\DirectXContext\d3d_psoFactory.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="src\Loading\Images\WIC_ImageLoader.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\Graffics\Infrastruktur\ShaderRegistry.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graffics\Infrastruktur\DrawDescriptor.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
@@ -89,9 +89,6 @@
     <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_FixedUploadBuffer.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\Graffics\DirectXContext\d3d_psoFactory.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\Loading\Images\WIC_ImageLoader.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -102,6 +99,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Graffics\Infrastruktur\ShaderRegistry.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\Infrastruktur\DrawDescriptor.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

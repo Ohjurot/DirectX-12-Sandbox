@@ -97,9 +97,9 @@
     <ClCompile Include="src\Application\Flow.cpp" />
     <ClCompile Include="src\Game\Game.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_Device.cpp" />
-    <ClCompile Include="src\Graffics\DirectXContext\d3d_psoFactory.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_SwapChain.cpp" />
     <ClCompile Include="src\Graffics\DirectXContext\d3d_View.cpp" />
+    <ClCompile Include="src\Graffics\Infrastruktur\DrawDescriptor.cpp" />
     <ClCompile Include="src\Graffics\Infrastruktur\ShaderRegistry.cpp" />
     <ClCompile Include="src\Loading\Blobs\d3dBlogLoader.cpp" />
     <ClCompile Include="src\Loading\Images\WIC_ImageLoader.cpp" />
@@ -114,11 +114,11 @@
     <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_FixedUploadBuffer.h" />
     <ClInclude Include="src\Graffics\DirectXContext\Buffers\d3d_VariableUploadBuffer.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_Device.h" />
-    <ClInclude Include="src\Graffics\DirectXContext\d3d_psoFactory.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_SwapChain.h" />
     <ClInclude Include="src\Graffics\DirectXContext\d3d_View.h" />
     <ClInclude Include="src\Graffics\DirectXContext\Texture\d3d_TextureUploader.h" />
     <ClInclude Include="src\Graffics\gfxCommon.h" />
+    <ClInclude Include="src\Graffics\Infrastruktur\DrawDescriptor.h" />
     <ClInclude Include="src\Graffics\Infrastruktur\ShaderRegistry.h" />
     <ClInclude Include="src\Loading\Blobs\d3dBlogLoader.h" />
     <ClInclude Include="src\Loading\Images\WIC_ImageLoader.h" />

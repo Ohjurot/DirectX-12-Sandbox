@@ -11,7 +11,6 @@
 #include <Graffics/DirectXContext/d3d_Device.h>
 #include <Graffics/DirectXContext/d3d_SwapChain.h>
 #include <Graffics/DirectXContext/d3d_View.h>
-#include <Graffics/DirectXContext/d3d_psoFactory.h>
 #include <Graffics/DirectXContext/Buffers/d3d_FixedUploadBuffer.h>
 #include <Graffics/DirectXContext/Buffers/d3d_VariableUploadBuffer.h>
 #include <Graffics/DirectXContext/Texture/d3d_TextureUploader.h>
@@ -20,6 +19,7 @@
 #include <Loading/Images/WIC_ImageLoader.h>
 
 #include <Graffics/Infrastruktur/ShaderRegistry.h>
+#include <Graffics/Infrastruktur/DrawDescriptor.h>
 
 namespace MY {
 	class Game : public Application::GfxApp {

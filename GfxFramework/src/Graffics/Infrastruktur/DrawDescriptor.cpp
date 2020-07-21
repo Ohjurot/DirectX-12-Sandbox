@@ -1,28 +1,40 @@
-#include "d3d_psoFactory.h"
+#include "DrawDescriptor.h"
 
-HRESULT D3D::PSOFactory::createPso(D3D::Device* ptrDevice, ID3D12PipelineState** ppPso, INT idVertexShader, INT idPixelShader,
-    ID3D12RootSignature* ptrRootSignature, UINT numInputElements, D3D12_INPUT_ELEMENT_DESC* ptrInputElements, D3D12_CULL_MODE cullMode, D3D12_FILL_MODE fillMode){
-    
+bool IF3D12::DrawPipelineDescriptor::operator==(const DrawPipelineDescriptor& b){
+    return(memcmp(&b, this, sizeof(DrawPipelineDescriptor)) == 0);
+}
+
+HRESULT IF3D12::DrawPipelineDescriptor::makePso(ID3D12Device* ptrDevice, ID3D12PipelineState** ppPso, ID3D12RootSignature** ppRootSignature, INT idCurrentRoot, DrawPipelineDescriptor* ptrDescriptor){
     // Load shaders
-    IF3D12::Shader* ptrVertexShader = nullptr;
-    IF3D12::ShaderRegistry::getRegistry()->getShader(idVertexShader, &ptrVertexShader);
-    if (!ptrVertexShader) {
-        return E_FAIL;
+    IF3D12::Shader* ptrRootSignature, *ptrVertexShader, *ptrPixelShader;
+    if (!IF3D12::ShaderRegistry::getRegistry()->getShader(ptrDescriptor->rootSignatureId, &ptrRootSignature) ||
+        !IF3D12::ShaderRegistry::getRegistry()->getShader(ptrDescriptor->shaders.idVertex, &ptrVertexShader) ||
+        !IF3D12::ShaderRegistry::getRegistry()->getShader(ptrDescriptor->shaders.idPixel, &ptrPixelShader)
+    ) {
+        return ERROR_NOT_FOUND;
     }
 
-    IF3D12::Shader* ptrPixelShader = nullptr;
-    IF3D12::ShaderRegistry::getRegistry()->getShader(idPixelShader, &ptrPixelShader);
-    if (!ptrPixelShader) {
-        return E_FAIL;
-    }
+    // Create root signature
+    if (ptrDescriptor->rootSignatureId != idCurrentRoot) {
+        // Release old
+        if (*ppRootSignature) {
+            (*ppRootSignature)->Release();
+            *ppRootSignature = NULL;
+        }
 
+        // Create new
+        HRESULT hrTemp;
+        if (FAILED(hrTemp = ptrDevice->CreateRootSignature(NULL, ptrRootSignature->ptrData, ptrRootSignature->size, IID_PPV_ARGS(ppRootSignature)))) {
+            return hrTemp;
+        }
+    }
 
     // Describe rasterizer
     D3D12_RASTERIZER_DESC rasterizerDesk;
     ZeroMemory(&rasterizerDesk, sizeof(D3D12_RASTERIZER_DESC));
 
-    rasterizerDesk.FillMode = fillMode;
-    rasterizerDesk.CullMode = cullMode;
+    rasterizerDesk.FillMode = ptrDescriptor->fillMode;
+    rasterizerDesk.CullMode = ptrDescriptor->cullMode;
     rasterizerDesk.DepthClipEnable = FALSE;
     rasterizerDesk.FrontCounterClockwise = FALSE;
     rasterizerDesk.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
@@ -37,9 +49,9 @@ HRESULT D3D::PSOFactory::createPso(D3D::Device* ptrDevice, ID3D12PipelineState**
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesk;
     ZeroMemory(&psoDesk, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
-    psoDesk.pRootSignature = ptrRootSignature;
-    psoDesk.InputLayout.NumElements = numInputElements;
-    psoDesk.InputLayout.pInputElementDescs = ptrInputElements;
+    psoDesk.pRootSignature = *ppRootSignature;
+    psoDesk.InputLayout.NumElements = ptrDescriptor->inputLayoutElementCount;
+    psoDesk.InputLayout.pInputElementDescs = ptrDescriptor->ptrInputLayout;
     psoDesk.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     psoDesk.VS.BytecodeLength = ptrVertexShader->size;
     psoDesk.VS.pShaderBytecode = ptrVertexShader->ptrData;
@@ -62,6 +74,6 @@ HRESULT D3D::PSOFactory::createPso(D3D::Device* ptrDevice, ID3D12PipelineState**
     psoDesk.SampleDesc.Count = 1;
     psoDesk.SampleDesc.Quality = 0;
 
-    // Create
-    return ptrDevice->getDevice()->CreateGraphicsPipelineState(&psoDesk, IID_PPV_ARGS(ppPso));
+    // Create State
+    return ptrDevice->CreateGraphicsPipelineState(&psoDesk ,IID_PPV_ARGS(ppPso));
 }
