@@ -41,9 +41,10 @@ namespace D3D {
 			UINT m_uiFenceVal = 0;
 
 			// Command stuff
+			UINT m_uiCurrentList = 0;
 			ID3D12CommandQueue* m_ptrCmdQue = NULL;
-			ID3D12CommandAllocator* m_ptrCmdAlloc = NULL;
-			ID3D12GraphicsCommandList* m_ptrCmdList = NULL;
+			ID3D12CommandAllocator* m_ptrCmdAlloc[2];
+			ID3D12GraphicsCommandList* m_ptrCmdList[2];
 
 			// Desc Heap size
 			UINT m_uiDescHeapSizeRTV = 0;
