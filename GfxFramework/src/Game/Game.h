@@ -20,6 +20,8 @@
 
 #include <Graffics/Infrastruktur/ShaderRegistry.h>
 #include <Graffics/Infrastruktur/DrawDescriptor.h>
+#include <Graffics/Infrastruktur/Modell/DataBufferCPU.h>
+#include <Graffics/Infrastruktur/Modell/DataBufferGPU.h>
 #include <Graffics/Infrastruktur/Modell/VertexLayout.h>
 
 namespace MY {
@@ -58,11 +60,13 @@ namespace MY {
 			ID3D12RootSignature* m_ptrRootSig = NULL;
 
 			// Vertex buffer resource
-			ID3D12Resource* m_ptrVertexBuffer = NULL;
+			IF3D12::CPUDataBuffer m_bufferVertexCpu;
+			IF3D12::GPUDataBuffer m_bufferVertex;
 			D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView = {};
 
 			// Constant buffer
-			ID3D12Resource* m_ptrConstBuffer = NULL;
+			IF3D12::CPUDataBuffer m_bufferConstCpu;
+			IF3D12::GPUDataBuffer m_bufferConst;
 			D3D12_CONSTANT_BUFFER_VIEW_DESC m_constBufferView = {};
 
 			// Texure

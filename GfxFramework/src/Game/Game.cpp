@@ -39,89 +39,25 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     m_inputLayout.appendElement({ IF3D12::VertexInputType::FLOAT2, "TEXTCORDS" });
 
     // == Create Vertex buffer
-    // Describe heap
-    D3D12_HEAP_PROPERTIES vbHeapProp;
-    ZeroMemory(&vbHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
-    vbHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-    vbHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    vbHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    vbHeapProp.CreationNodeMask = NULL;
-    vbHeapProp.VisibleNodeMask = NULL;
-
-    // Describe Resource
-    D3D12_RESOURCE_DESC vbDesk;
-    ZeroMemory(&vbDesk, sizeof(D3D12_RESOURCE_DESC));
-    vbDesk.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    vbDesk.Width = (sizeof(Vertex) * 3);
-    vbDesk.Height = 1;
-    vbDesk.DepthOrArraySize = 1;
-    vbDesk.MipLevels = 1;
-    vbDesk.Format = DXGI_FORMAT_UNKNOWN;
-    vbDesk.SampleDesc.Count = 1;
-    vbDesk.SampleDesc.Quality = 0;
-    vbDesk.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    vbDesk.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-    // Create Vertex buffer
-    COM_CREATE_HR_RETURN(hr, m_ptrDevice->getDevice()->CreateCommittedResource(
-        &vbHeapProp,
-        D3D12_HEAP_FLAG_NONE,
-        &vbDesk,
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        NULL,
-        IID_PPV_ARGS(&m_ptrVertexBuffer)
-    ));
-
-    // Copy buffer
-    COM_CREATE_HR_RETURN(hr, m_uploadBuffer.setBuffer(m_ptrDevice, m_ptrVertexBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, (void*)c_cpuBuffer, 0, sizeof(Vertex) * 3));
+    m_bufferVertexCpu = IF3D12::CPUDataBuffer((void*)c_cpuBuffer, sizeof(Vertex) * 3);
+    m_bufferVertex = IF3D12::GPUDataBuffer(&m_bufferVertexCpu);
+    m_bufferVertex.update(m_ptrDevice);
 
     // Create view
     ZeroMemory(&m_vertexBufferView, sizeof(D3D12_VERTEX_BUFFER_VIEW));
-    m_vertexBufferView.BufferLocation = m_ptrVertexBuffer->GetGPUVirtualAddress();
+    m_vertexBufferView.BufferLocation = m_bufferVertex.getGPUVirtualAddress();
     m_vertexBufferView.SizeInBytes = sizeof(Vertex) * 3;
     m_vertexBufferView.StrideInBytes = sizeof(Vertex);
 
 
     // == Create Constant buffer
-    // Describe heap
-    D3D12_HEAP_PROPERTIES cbHeapProp;
-    ZeroMemory(&vbHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
-    cbHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-    cbHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    cbHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    cbHeapProp.CreationNodeMask = NULL;
-    cbHeapProp.VisibleNodeMask = NULL;
-
-    // Describe Resource
-    D3D12_RESOURCE_DESC cbDesk;
-    ZeroMemory(&cbDesk, sizeof(D3D12_RESOURCE_DESC));
-    cbDesk.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    cbDesk.Width = sizeof(CBuffer);
-    cbDesk.Height = 1;
-    cbDesk.DepthOrArraySize = 1;
-    cbDesk.MipLevels = 1;
-    cbDesk.Format = DXGI_FORMAT_UNKNOWN;
-    cbDesk.SampleDesc.Count = 1;
-    cbDesk.SampleDesc.Quality = 0;
-    cbDesk.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    cbDesk.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-    // Create const buffer
-    COM_CREATE_HR_RETURN(hr, m_ptrDevice->getDevice()->CreateCommittedResource(
-        &cbHeapProp,
-        D3D12_HEAP_FLAG_NONE,
-        &cbDesk,
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        NULL,
-        IID_PPV_ARGS(&m_ptrConstBuffer)
-    ));
+    m_bufferConstCpu = IF3D12::CPUDataBuffer(&m_cpuConstBuffer, sizeof(CBuffer));
+    m_bufferConst = IF3D12::GPUDataBuffer(&m_bufferConstCpu);
+    m_bufferConst.update(m_ptrDevice);
 
     // Describe view
-    m_constBufferView.BufferLocation = m_ptrConstBuffer->GetGPUVirtualAddress();
+    m_constBufferView.BufferLocation = m_bufferConst.getGPUVirtualAddress();
     m_constBufferView.SizeInBytes = sizeof(CBuffer);
-
-    // Copy buffer
-    COM_CREATE_HR_RETURN(hr, m_uploadBuffer.setBuffer(m_ptrDevice, m_ptrConstBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, &m_cpuConstBuffer, 0, sizeof(CBuffer)));
 
     // == Create texture
     void* memTex = nullptr;
@@ -133,7 +69,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
     // Heap
     D3D12_HEAP_PROPERTIES txHeapProp;
-    ZeroMemory(&vbHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
+    ZeroMemory(&txHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
     txHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
     txHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
     txHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
@@ -142,7 +78,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
     // Describe Resource
     D3D12_RESOURCE_DESC txDesk;
-    ZeroMemory(&cbDesk, sizeof(D3D12_RESOURCE_DESC));
+    ZeroMemory(&txDesk, sizeof(D3D12_RESOURCE_DESC));
     txDesk.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
     txDesk.Width = texWidth;
     txDesk.Height = texHeight;
@@ -228,7 +164,7 @@ HRESULT MY::Game::Loop(){
         if (angel >= DirectX::XM_PI * 2) angel -= DirectX::XM_PI * 2;
 
         m_cpuConstBuffer.matTransform = DirectX::XMMatrixRotationZ(angel);
-        m_uploadBuffer.setBuffer(m_ptrDevice, m_ptrConstBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, &m_cpuConstBuffer, 0, sizeof(CBuffer));
+        m_bufferConst.update(m_ptrDevice);
     }
 
     // ### GFX: Begin frame
@@ -273,10 +209,10 @@ HRESULT MY::Game::Shutdown(){
     m_uploadBuffer.preDestructDestroy();
     COM_RELEASE(m_ptrHeapRootTable);
     COM_RELEASE(m_ptrTexture);
-    COM_RELEASE(m_ptrConstBuffer);
+    m_bufferConst.preDestructDestroy();
     COM_RELEASE(m_ptrRootSig)
     COM_RELEASE(m_ptrPso);
-    COM_RELEASE(m_ptrVertexBuffer);
+    m_bufferVertex.preDestructDestroy();
     // ================
 
     // Shutdown members

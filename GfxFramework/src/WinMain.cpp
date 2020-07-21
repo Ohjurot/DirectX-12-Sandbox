@@ -6,7 +6,7 @@
 #include <Game/Game.h>
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
-	// Create stack application
+	//Create stack application
 	MY::Game game;
 	
 	// Describe Application
