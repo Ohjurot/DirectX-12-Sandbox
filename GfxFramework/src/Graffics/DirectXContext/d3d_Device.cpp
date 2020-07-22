@@ -41,20 +41,17 @@ HRESULT D3D::Device::Init(IDXGIAdapter* ptrAdapter){
 	queDesc.NodeMask = NULL;
 	COM_SAFE_CREATE_HR_RETURN(hr, m_ptrDevice->CreateCommandQueue(&queDesc, IID_PPV_ARGS(&m_ptrCmdQue)));
 
-	
-	for (UINT i = 0; i < 2; i++) {
-		// Command alloc
-		COM_SAFE_CREATE_HR_RETURN(hr, m_ptrDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_ptrCmdAlloc[i])));
+	// Command alloc
+	COM_SAFE_CREATE_HR_RETURN(hr, m_ptrDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_ptrCmdAlloc)));
 
-		// Command list
-		COM_SAFE_CREATE_HR_RETURN(hr, m_ptrDevice->CreateCommandList(
-			NULL,
-			D3D12_COMMAND_LIST_TYPE_DIRECT,
-			m_ptrCmdAlloc[i],
-			NULL,
-			IID_PPV_ARGS(&m_ptrCmdList[i])
-		));
-	}
+	// Command list
+	COM_SAFE_CREATE_HR_RETURN(hr, m_ptrDevice->CreateCommandList(
+		NULL,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		m_ptrCmdAlloc,
+		NULL,
+		IID_PPV_ARGS(&m_ptrCmdList)
+	));
 
 	// Read heap sizes
 	m_uiDescHeapSizeRTV = m_ptrDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -68,10 +65,8 @@ HRESULT D3D::Device::Init(IDXGIAdapter* ptrAdapter){
 
 VOID D3D::Device::Shutdown(){
 	// Command
-	for (UINT i = 0; i < 2; i++) {
-		COM_RELEASE(m_ptrCmdList[i]);
-		COM_RELEASE(m_ptrCmdAlloc[i]);
-	}
+	COM_RELEASE(m_ptrCmdList);
+	COM_RELEASE(m_ptrCmdAlloc);
 	COM_RELEASE(m_ptrCmdQue);
 	COM_RELEASE(m_ptrFence);
 
@@ -95,7 +90,7 @@ ID3D12CommandQueue* D3D::Device::getCommandQue(){
 }
 
 ID3D12GraphicsCommandList* D3D::Device::getCommandList(){
-	return m_ptrCmdList[m_uiCurrentList];
+	return m_ptrCmdList;
 }
 
 UINT D3D::Device::getHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE type){
@@ -119,16 +114,16 @@ UINT D3D::Device::getHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE type){
 
 BOOL D3D::Device::dispatchCommandList(){
 	// Check if command list is bussy and return false if it is
-	if (m_uiFenceVal > 1 + m_ptrFence->GetCompletedValue()) {
+	if (m_uiFenceVal > m_ptrFence->GetCompletedValue()) {
 		return FALSE;
 	}
 
 	// Close command list
-	m_ptrCmdList[m_uiCurrentList]->Close();
+	m_ptrCmdList->Close();
 
 	// Que into array
 	ID3D12CommandList* arr[] = {
-		m_ptrCmdList[m_uiCurrentList]
+		m_ptrCmdList
 	};
 
 	// Execute command list
@@ -138,15 +133,12 @@ BOOL D3D::Device::dispatchCommandList(){
 	m_uiFenceVal++;
 	m_ptrCmdQue->Signal(m_ptrFence, m_uiFenceVal);
 
-	// Swap lists
-	m_uiCurrentList = (m_uiCurrentList + 1) % 2;
-
 	return TRUE;
 }
 
 VOID D3D::Device::waitForCommandListAndReset(ID3D12PipelineState* ptrPso){
 	// Check if windows event hanlde is required (que still running)
-	if (m_ptrFence->GetCompletedValue() < m_uiFenceVal - 1) {
+	if (m_ptrFence->GetCompletedValue() < m_uiFenceVal) {
 		// Create event handle
 		HANDLE hEvent = CreateEventEx(NULL, FALSE, FALSE, EVENT_ALL_ACCESS);
 		
@@ -161,6 +153,6 @@ VOID D3D::Device::waitForCommandListAndReset(ID3D12PipelineState* ptrPso){
 	}
 
 	// Reset allocator and list
-	m_ptrCmdAlloc[m_uiCurrentList]->Reset();
-	m_ptrCmdList[m_uiCurrentList]->Reset(m_ptrCmdAlloc[m_uiCurrentList], ptrPso);
+	m_ptrCmdAlloc->Reset();
+	m_ptrCmdList->Reset(m_ptrCmdAlloc, ptrPso);
 }
