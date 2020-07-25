@@ -17,13 +17,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
     // Init view
     m_ptrView = new D3D::View(width, height);
-
-
-    // == Init CPU Const Buffer
-    m_cpuConstBuffer.matView = DirectX::XMMatrixScaling(((float)height / (float)width), 1.0f, 1.0f);
-    m_cpuConstBuffer.matTransform = DirectX::XMMatrixIdentity();
     
-
     // == Load Shaders
     IF3D12::Shader* ptrShaderRootSig;
     UINT idVs = IF3D12::ShaderRegistry::getRegistry()->getShader(L"SimpleVS.cso");
@@ -39,84 +33,28 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     m_inputLayout.appendElement({ IF3D12::VertexInputType::FLOAT2, "TEXTCORDS" });
 
     // == Create Vertex buffer
-    m_bufferVertexCpu = IF3D12::CPUDataBuffer((void*)c_cpuBuffer, sizeof(Vertex) * 3);
-    m_bufferVertex = IF3D12::GPUDataBuffer(&m_bufferVertexCpu);
-    m_bufferVertex.update(m_ptrDevice);
+    memcpy(m_vertexBuffer.getDataPointer(), c_cpuBuffer, m_vertexBuffer.size);
+    m_vertexBuffer.updateIfDirty(m_ptrDevice);
 
     // Create view
     ZeroMemory(&m_vertexBufferView, sizeof(D3D12_VERTEX_BUFFER_VIEW));
-    m_vertexBufferView.BufferLocation = m_bufferVertex.getGPUVirtualAddress();
+    m_vertexBufferView.BufferLocation = m_vertexBuffer.getGpuAddress();
     m_vertexBufferView.SizeInBytes = sizeof(Vertex) * 3;
     m_vertexBufferView.StrideInBytes = sizeof(Vertex);
 
 
     // == Create Constant buffer
-    m_bufferConstCpu = IF3D12::CPUDataBuffer(&m_cpuConstBuffer, sizeof(CBuffer));
-    m_bufferConst = IF3D12::GPUDataBuffer(&m_bufferConstCpu);
-    m_bufferConst.update(m_ptrDevice);
+    m_constBuffer.getDataPointer()->matView = DirectX::XMMatrixScaling(((float)height / (float)width), 1.0f, 1.0f);
+    m_constBuffer.getDataPointer()->matTransform = DirectX::XMMatrixIdentity();
+    m_constBuffer.updateIfDirty(m_ptrDevice);
 
     // Describe view
-    m_constBufferView.BufferLocation = m_bufferConst.getGPUVirtualAddress();
+    m_constBufferView.BufferLocation = m_constBuffer.getGpuAddress();
     m_constBufferView.SizeInBytes = sizeof(CBuffer);
 
-    // == Create texture
-    void* memTex = nullptr;
-    SIZE_T sizeBytes = 0;
-    UINT texWidth, texHeight;
-    DXGI_FORMAT texFormat;
-    COM_CREATE_HR_RETURN(hr, Util::TexureLoader::fromFileToMemory(L"./texture.png", m_ptrDevice, &memTex, &sizeBytes, &texWidth, &texHeight, &texFormat));
-    assert(memTex);
-
-    // Heap
-    D3D12_HEAP_PROPERTIES txHeapProp;
-    ZeroMemory(&txHeapProp, sizeof(D3D12_HEAP_PROPERTIES));
-    txHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
-    txHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    txHeapProp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    txHeapProp.CreationNodeMask = NULL;
-    txHeapProp.VisibleNodeMask = NULL;
-
-    // Describe Resource
-    D3D12_RESOURCE_DESC txDesk;
-    ZeroMemory(&txDesk, sizeof(D3D12_RESOURCE_DESC));
-    txDesk.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-    txDesk.Width = texWidth;
-    txDesk.Height = texHeight;
-    txDesk.Alignment = 0;
-    txDesk.DepthOrArraySize = 1;
-    txDesk.MipLevels = 1;
-    txDesk.Format = texFormat;
-    txDesk.SampleDesc.Count = 1;
-    txDesk.SampleDesc.Quality = 0;
-    txDesk.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-    txDesk.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-    // Create texture
-    hr = m_ptrDevice->getDevice()->CreateCommittedResource(
-        &txHeapProp,
-        D3D12_HEAP_FLAG_NONE,
-        &txDesk,
-        D3D12_RESOURCE_STATE_COMMON,
-        NULL,
-        IID_PPV_ARGS(&m_ptrTexture)
-    );
-
-    // Copy
-    D3D::TextureUploader upBuffer;
-    if (!FAILED(hr)) {
-        hr = upBuffer.setBuffer(m_ptrDevice, m_ptrTexture, D3D12_RESOURCE_STATE_COMMON, memTex, texWidth, texHeight, texFormat, sizeBytes);
-    }
-    upBuffer.preDestructDestroy();
-
-    // Free temporary memory texture
-    if(memTex) {
-        free(memTex);
-    }
-
-    // Return here to make shure free(...) is called
-    if (FAILED(hr)) {
-        return hr;
-    }
+    // == Texture
+    m_ptrTexture = new IF3D12::Texture(L"./texture.png");
+    COM_CREATE_HR_RETURN(hr, m_ptrTexture->load(m_ptrDevice));
 
     // == SRV (For Texture)
     // Heap
@@ -129,16 +67,8 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     COM_CREATE_HR_RETURN(hr, m_ptrDevice->getDevice()->CreateDescriptorHeap(&hpRtHeapDesk, IID_PPV_ARGS(&m_ptrHeapRootTable)));
 
     // Descriptor
-    D3D12_SHADER_RESOURCE_VIEW_DESC rvDesk;
-    rvDesk.Format = texFormat;
-    rvDesk.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    rvDesk.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    rvDesk.Texture2D.MipLevels = 1;
-    rvDesk.Texture2D.MostDetailedMip = 0;
-    rvDesk.Texture2D.PlaneSlice = 0;
-    rvDesk.Texture2D.ResourceMinLODClamp = 0.0f;
-
-    m_ptrDevice->getDevice()->CreateShaderResourceView(m_ptrTexture, &rvDesk, m_ptrHeapRootTable->GetCPUDescriptorHandleForHeapStart());
+    D3D12_SHADER_RESOURCE_VIEW_DESC rvDesk = m_ptrTexture->createViewDesc();
+    m_ptrDevice->getDevice()->CreateShaderResourceView(m_ptrTexture->getResourcePointer(), &rvDesk, m_ptrHeapRootTable->GetCPUDescriptorHandleForHeapStart());
 
     // == Create PSO
     IF3D12::DrawPipelineDescriptor descriptor;
@@ -163,9 +93,12 @@ HRESULT MY::Game::Loop(){
 
         if (angel >= DirectX::XM_PI * 2) angel -= DirectX::XM_PI * 2;
 
-        m_cpuConstBuffer.matTransform = DirectX::XMMatrixRotationZ(angel);
-        m_bufferConst.update(m_ptrDevice);
+        m_constBuffer.getDataPointer()->matTransform = DirectX::XMMatrixRotationZ(angel);
     }
+    if (FAILED(m_constBuffer.updateIfDirty(m_ptrDevice))) {
+        return E_FAIL;
+    }
+    
 
     // ### GFX: Begin frame
     static FLOAT m_clearColor[4] = { 0.388f, 0.733f, 0.949f, 1.0f };
@@ -208,11 +141,11 @@ HRESULT MY::Game::Shutdown(){
     // === VIDEO 4 ===
     m_uploadBuffer.preDestructDestroy();
     COM_RELEASE(m_ptrHeapRootTable);
-    COM_RELEASE(m_ptrTexture);
-    m_bufferConst.preDestructDestroy();
+    delete m_ptrTexture;
+    m_constBuffer.destroy();
     COM_RELEASE(m_ptrRootSig)
     COM_RELEASE(m_ptrPso);
-    m_bufferVertex.preDestructDestroy();
+    m_vertexBuffer.destroy();
     // ================
 
     // Shutdown members

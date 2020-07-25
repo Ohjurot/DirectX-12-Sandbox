@@ -16,6 +16,8 @@ namespace IF3D12 {
 			GPUDataBuffer(IF3D12::CPUDataBuffer* ptrTargetBuffer);
 			~GPUDataBuffer();
 
+			IF3D12::CPUDataBuffer* getCpuBuffer();
+
 			HRESULT update(D3D::Device* ptrDevice);
 			VOID preDestructDestroy();
 			D3D12_GPU_VIRTUAL_ADDRESS getGPUVirtualAddress();
@@ -25,6 +27,9 @@ namespace IF3D12 {
 
 			IF3D12::CPUDataBuffer* m_ptrBuffer;
 			ID3D12Resource* m_ptrD3DBuffer;
-			D3D::VariableUploadBuffer m_uploadBuffer;
+			BOOL m_bLocalCommitReferenc = TRUE;
+			
+			static D3D::VariableUploadBuffer s_uploadBuffer;
+			static UINT s_uiUploadRefCount;
 	};
 }

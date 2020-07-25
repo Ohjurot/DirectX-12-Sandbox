@@ -1,20 +1,30 @@
 #include "DataBufferGPU.h"
 
+D3D::VariableUploadBuffer IF3D12::GPUDataBuffer::s_uploadBuffer = D3D::VariableUploadBuffer();
+UINT IF3D12::GPUDataBuffer::s_uiUploadRefCount = 0;
+
 IF3D12::GPUDataBuffer::GPUDataBuffer(){
     m_ptrBuffer = NULL;
     m_ptrD3DBuffer = NULL;
+
+    s_uiUploadRefCount++;
 }
 
 IF3D12::GPUDataBuffer::GPUDataBuffer(IF3D12::CPUDataBuffer* ptrTargetBuffer){
 	m_ptrBuffer = ptrTargetBuffer;
 	m_ptrD3DBuffer = NULL;
-	m_uploadBuffer = D3D::VariableUploadBuffer();
 
 	m_uiLastSize = 0;
+
+    s_uiUploadRefCount++;
 }
 
 IF3D12::GPUDataBuffer::~GPUDataBuffer(){
     preDestructDestroy();
+}
+
+IF3D12::CPUDataBuffer* IF3D12::GPUDataBuffer::getCpuBuffer(){
+    return m_ptrBuffer;
 }
 
 HRESULT IF3D12::GPUDataBuffer::update(D3D::Device* ptrDevice){
@@ -65,11 +75,25 @@ HRESULT IF3D12::GPUDataBuffer::update(D3D::Device* ptrDevice){
         m_uiLastSize = m_ptrBuffer->getSize();
 	}
 
+    // Increment ref
+    if (!m_bLocalCommitReferenc) {
+        s_uiUploadRefCount++;
+        m_bLocalCommitReferenc = FALSE;
+    }
+
     // Upload Data
-    return m_uploadBuffer.setBuffer(ptrDevice, m_ptrD3DBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, m_ptrBuffer->getBuffer(), 0, m_ptrBuffer->getSize());
+    return s_uploadBuffer.setBuffer(ptrDevice, m_ptrD3DBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, m_ptrBuffer->getBuffer(), 0, m_ptrBuffer->getSize());
 }
 
 VOID IF3D12::GPUDataBuffer::preDestructDestroy(){
+    if (m_bLocalCommitReferenc) {
+        s_uiUploadRefCount--;
+        m_bLocalCommitReferenc = FALSE;
+        if (s_uiUploadRefCount == 0) {
+            s_uploadBuffer.preDestructDestroy();
+        }
+    }
+
     COM_RELEASE(m_ptrD3DBuffer);
 }
 

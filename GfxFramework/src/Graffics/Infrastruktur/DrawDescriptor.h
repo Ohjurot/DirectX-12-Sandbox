@@ -10,13 +10,12 @@ namespace IF3D12 {
 	typedef INT IIDDescriptor;
 
 	struct DrawPipelineDescriptor {
-		struct _ShaderIds {
+		INT rootSignatureId;
+		struct {
 			INT idVertex;
 			INT idPixel;
-		};
-
-		INT rootSignatureId;
-		_ShaderIds shaders;
+		} shaders;
+		
 		D3D12_CULL_MODE cullMode;
 		D3D12_FILL_MODE fillMode;
 		

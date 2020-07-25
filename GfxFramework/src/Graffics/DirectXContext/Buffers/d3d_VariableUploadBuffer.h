@@ -94,6 +94,8 @@ namespace D3D {
 				// Execute
 				ptrDevice->dispatchCommandList();
 				ptrDevice->waitForCommandListAndReset();
+
+				return S_OK;
 			}
 
 			VOID preDestructDestroy() {

@@ -23,6 +23,8 @@
 #include <Graffics/Infrastruktur/Modell/DataBufferCPU.h>
 #include <Graffics/Infrastruktur/Modell/DataBufferGPU.h>
 #include <Graffics/Infrastruktur/Modell/VertexLayout.h>
+#include <Graffics/Infrastruktur/Modell/DataBuffer.h>
+#include <Graffics/Infrastruktur/Modell/Texture.h>
 
 namespace MY {
 	class Game : public Application::GfxApp {
@@ -60,17 +62,15 @@ namespace MY {
 			ID3D12RootSignature* m_ptrRootSig = NULL;
 
 			// Vertex buffer resource
-			IF3D12::CPUDataBuffer m_bufferVertexCpu;
-			IF3D12::GPUDataBuffer m_bufferVertex;
+			IF3D12::FDataBuffer<Vertex, 3> m_vertexBuffer;
 			D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView = {};
 
 			// Constant buffer
-			IF3D12::CPUDataBuffer m_bufferConstCpu;
-			IF3D12::GPUDataBuffer m_bufferConst;
+			IF3D12::FDataBuffer<CBuffer> m_constBuffer;
 			D3D12_CONSTANT_BUFFER_VIEW_DESC m_constBufferView = {};
 
 			// Texure
-			ID3D12Resource* m_ptrTexture;
+			IF3D12::Texture* m_ptrTexture = NULL;
 			ID3D12DescriptorHeap* m_ptrHeapRootTable;
 			
 			// Vertex buffer for triangle
@@ -79,8 +79,6 @@ namespace MY {
 				{-0.5f, -0.5f,		0.0650f, 0.8971f},
 				{0.5f, -0.5f,		0.9051f, 0.8971f},
 			};
-
-			CBuffer m_cpuConstBuffer;
 			
 			// Vertex input layout descriptor
 			IF3D12::VertexLayout m_inputLayout;

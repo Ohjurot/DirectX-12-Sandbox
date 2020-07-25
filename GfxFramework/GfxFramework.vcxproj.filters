@@ -60,6 +60,15 @@
     <ClCompile Include="src\Graffics\Infrastruktur\Modell\DataBufferGPU.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graffics\Infrastruktur\Modell\Texture.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graffics\Infrastruktur\Modell\Modell.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graffics\Infrastruktur\PiplineState\PsoRegistry.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\WindowFramework\WindowProc.h">
@@ -120,6 +129,18 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Graffics\Infrastruktur\Modell\DataBufferGPU.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\Infrastruktur\Modell\DataBuffer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\Infrastruktur\Modell\Texture.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\Infrastruktur\Modell\Modell.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graffics\Infrastruktur\PiplineState\PsoRegistry.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

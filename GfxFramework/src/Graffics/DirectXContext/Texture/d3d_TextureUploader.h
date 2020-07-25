@@ -39,9 +39,10 @@ namespace D3D {
 				}
 				
 				// Check if buffer creation is needed
-				if (!m_ptrUploadBuffer || copySizem > m_bufferSize) {
+				if (!m_ptrUploadBuffer || copySizem > m_bufferSize || format != m_lastFormat) {
 					COM_RELEASE(m_ptrUploadBuffer);
 					m_bufferSize = copySizem;
+					m_lastFormat = format;
 
 					// Describe Upload heap
 					D3D12_HEAP_PROPERTIES uplHeapProp;
@@ -156,6 +157,7 @@ namespace D3D {
 
 		private:
 			ID3D12Resource* m_ptrUploadBuffer = NULL;
+			DXGI_FORMAT m_lastFormat = DXGI_FORMAT_UNKNOWN;
 			UINT m_bufferSize = 0;
 	};
 }

@@ -102,7 +102,10 @@
     <ClCompile Include="src\Graffics\Infrastruktur\DrawDescriptor.cpp" />
     <ClCompile Include="src\Graffics\Infrastruktur\Modell\DataBufferCPU.cpp" />
     <ClCompile Include="src\Graffics\Infrastruktur\Modell\DataBufferGPU.cpp" />
+    <ClCompile Include="src\Graffics\Infrastruktur\Modell\Modell.cpp" />
+    <ClCompile Include="src\Graffics\Infrastruktur\Modell\Texture.cpp" />
     <ClCompile Include="src\Graffics\Infrastruktur\Modell\VertexLayout.cpp" />
+    <ClCompile Include="src\Graffics\Infrastruktur\PiplineState\PsoRegistry.cpp" />
     <ClCompile Include="src\Graffics\Infrastruktur\ShaderRegistry.cpp" />
     <ClCompile Include="src\Loading\Blobs\d3dBlogLoader.cpp" />
     <ClCompile Include="src\Loading\Images\WIC_ImageLoader.cpp" />
@@ -122,9 +125,13 @@
     <ClInclude Include="src\Graffics\DirectXContext\Texture\d3d_TextureUploader.h" />
     <ClInclude Include="src\Graffics\gfxCommon.h" />
     <ClInclude Include="src\Graffics\Infrastruktur\DrawDescriptor.h" />
+    <ClInclude Include="src\Graffics\Infrastruktur\Modell\DataBuffer.h" />
     <ClInclude Include="src\Graffics\Infrastruktur\Modell\DataBufferCPU.h" />
     <ClInclude Include="src\Graffics\Infrastruktur\Modell\DataBufferGPU.h" />
+    <ClInclude Include="src\Graffics\Infrastruktur\Modell\Modell.h" />
+    <ClInclude Include="src\Graffics\Infrastruktur\Modell\Texture.h" />
     <ClInclude Include="src\Graffics\Infrastruktur\Modell\VertexLayout.h" />
+    <ClInclude Include="src\Graffics\Infrastruktur\PiplineState\PsoRegistry.h" />
     <ClInclude Include="src\Graffics\Infrastruktur\ShaderRegistry.h" />
     <ClInclude Include="src\Loading\Blobs\d3dBlogLoader.h" />
     <ClInclude Include="src\Loading\Images\WIC_ImageLoader.h" />

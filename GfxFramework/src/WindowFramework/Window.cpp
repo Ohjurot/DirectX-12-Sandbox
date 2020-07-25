@@ -103,7 +103,15 @@ LRESULT WF::Window::processMessage(HWND wnd, UINT msg, WPARAM wParam, LPARAM lPa
 				m_keyState.reset();
 			}
 			break;
-
+		
+		// Window move
+		case WM_MOVE:
+			{
+				// Clear member
+				ZeroMemory(&m_mouseState, sizeof(WF::MouseState));
+				m_keyState.reset();
+			}
+			break;
 
 		// Mouse Keys
 		case WM_LBUTTONDOWN:
