@@ -29,7 +29,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     }
 
     // == Input layout
-    m_inputLayout.appendElement({ IF3D12::VertexInputType::FLOAT2, "POSITION" });
+    m_inputLayout.appendElement({ IF3D12::VertexInputType::FLOAT3, "POSITION" });
     m_inputLayout.appendElement({ IF3D12::VertexInputType::FLOAT2, "TEXTCORDS" });
 
     // == Create Vertex buffer
@@ -39,7 +39,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     // Create view
     ZeroMemory(&m_vertexBufferView, sizeof(D3D12_VERTEX_BUFFER_VIEW));
     m_vertexBufferView.BufferLocation = m_vertexBuffer.getGpuAddress();
-    m_vertexBufferView.SizeInBytes = sizeof(Vertex) * 3;
+    m_vertexBufferView.SizeInBytes = sizeof(Vertex) * 12;
     m_vertexBufferView.StrideInBytes = sizeof(Vertex);
 
 
@@ -47,7 +47,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     // Modell matrix
     DirectX::XMStoreFloat4x4(
         &m_constBuffer.getDataPointer()->matModell, DirectX::XMMatrixTranspose(
-            DirectX::XMMatrixIdentity()
+            DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.1f)
         )
     );
     // View matrix
@@ -59,7 +59,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     // Projection matrix
     DirectX::XMStoreFloat4x4(
         &m_constBuffer.getDataPointer()->matProjection, DirectX::XMMatrixTranspose(
-            DirectX::XMMatrixScaling(((float)height / (float)width), 1.0f, 1.0f)
+            DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(120), (FLOAT)width/(FLOAT)height, 0.01f, 400.0f)
         )
     );
     m_constBuffer.updateIfDirty(m_ptrDevice);
@@ -90,7 +90,7 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
     IF3D12::DrawPipelineDescriptor descriptor;
     ZeroMemory(&descriptor, sizeof(IF3D12::DrawPipelineDescriptor));
 
-    descriptor.cullMode = D3D12_CULL_MODE_NONE;
+    descriptor.cullMode = D3D12_CULL_MODE_BACK;
     descriptor.fillMode = D3D12_FILL_MODE_SOLID;
     descriptor.ptrLayout = &m_inputLayout;
     descriptor.rootSignatureId = idRs;
@@ -111,7 +111,9 @@ HRESULT MY::Game::Loop(){
 
         DirectX::XMStoreFloat4x4(
             &m_constBuffer.getDataPointer()->matModell, DirectX::XMMatrixTranspose(
-                DirectX::XMMatrixRotationZ(angel)
+                // S
+                DirectX::XMMatrixRotationY(angel) * // R
+                DirectX::XMMatrixTranslation(0.0f, 0.0f, 1.1f) // T
             )
         );
     }
@@ -144,7 +146,7 @@ HRESULT MY::Game::Loop(){
     m_ptrDevice->getCommandList()->SetGraphicsRootDescriptorTable(1, m_ptrHeapRootTable->GetGPUDescriptorHandleForHeapStart());
 
     // Draw
-    m_ptrDevice->getCommandList()->DrawInstanced(3, 1, 0, 0);
+    m_ptrDevice->getCommandList()->DrawInstanced(12, 1, 0, 0);
 
     // ### GFX: End frame
     m_ptrSwapChain->endFrame(m_ptrDevice);

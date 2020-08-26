@@ -33,7 +33,7 @@ namespace MY {
 			
 			// Vertex deffinition
 			struct Vertex {
-				float posX, posY;
+				float posX, posY, posZ;
 				float u, v;
 			};
 
@@ -63,7 +63,7 @@ namespace MY {
 			ID3D12RootSignature* m_ptrRootSig = NULL;
 
 			// Vertex buffer resource
-			IF3D12::FDataBuffer<Vertex, 3> m_vertexBuffer;
+			IF3D12::FDataBuffer<Vertex, 12> m_vertexBuffer;
 			D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView = {};
 
 			// Constant buffer
@@ -75,10 +75,28 @@ namespace MY {
 			ID3D12DescriptorHeap* m_ptrHeapRootTable;
 			
 			// Vertex buffer for triangle
-			const Vertex c_cpuBuffer[3] = {
-				{0.0f, 0.5f,		0.5163f, 0.0716f},
-				{-0.5f, -0.5f,		0.0650f, 0.8971f},
-				{0.5f, -0.5f,		0.9051f, 0.8971f},
+			const Vertex c_cpuBuffer[12] = {
+				// FRONT
+				{0.0f,	0.5f,	0.0f,		0.5163f, 0.0716f},
+				{0.5f,	-0.5f,	-0.4f,		0.9051f, 0.8971f},
+				{-0.5f, -0.5f,	-0.4f,		0.0650f, 0.8971f},
+				
+				// Back
+				{0.0f,	0.5f,	0.0f,		0.5163f, 0.0716f},
+				{-0.5f, -0.5f,	0.4f,		0.9051f, 0.8971f},
+				{0.5f, -0.5f,	0.4f,		0.0650f, 0.8971f},
+				
+
+				// Left
+				{0.0f,	0.5f,	0.0f,		0.5163f, 0.0716f},
+				{0.5f, -0.5f,	0.4f,		0.9051f, 0.8971f},
+				{0.5f, -0.5f,	-0.4f,		0.0650f, 0.8971f},
+				
+				
+				// RIGHT
+				{0.0f,	0.5f,	0.0f,		0.5163f, 0.0716f},
+				{-0.5f, -0.5f,	-0.4f,		0.9051f, 0.8971f},
+				{-0.5f, -0.5f,	0.4f,		0.0650f, 0.8971f},
 			};
 			
 			// Vertex input layout descriptor

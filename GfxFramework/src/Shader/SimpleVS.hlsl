@@ -16,8 +16,8 @@ struct sOut
 ConstantBuffer<cBuf> genericBuffer : register(b0);
 
 [RootSignature(MyRS)]
-void main(float2 pos : POSITION, float2 tex : TEXTCORDS, out sOut outData)
+void main(float3 pos : POSITION, float2 tex : TEXTCORDS, out sOut outData)
 {
-    outData.pos = mul(mul(mul(float4(pos, 0.0f, 1.0f), genericBuffer.matModell), genericBuffer.matView), genericBuffer.matProjection);
+    outData.pos = mul(mul(mul(float4(pos, 1.0f), genericBuffer.matModell), genericBuffer.matView), genericBuffer.matProjection);
 	outData.tex = tex;
 }
