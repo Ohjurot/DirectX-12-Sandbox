@@ -25,6 +25,7 @@ namespace Util {
 
 		public:
 			static HRESULT fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrDevice, void** ppMemory, SIZE_T* pSize, UINT* pWidth, UINT* pHeight, DXGI_FORMAT* ptrResultFormat);
+			static HRESULT fromMemoryToMemory(void* ptrDataIn, SIZE_T blobSize, D3D::Device* ptrDevice, void** ppMemory, SIZE_T* pSize, UINT* pWidth, UINT* pHeight, DXGI_FORMAT* ptrResultFormat);
 
 		private:
 			static BOOL selectConverterDx(GUID ptrSrcGuid, DXGI_FORMAT* ptrDxFormat);

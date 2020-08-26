@@ -39,8 +39,9 @@ namespace MY {
 
 			// CBuffer deffiniton
 			struct CBuffer {
-				DirectX::XMMATRIX matView;
-				DirectX::XMMATRIX matTransform;
+				DirectX::XMFLOAT4X4 matModell;
+				DirectX::XMFLOAT4X4 matView;
+				DirectX::XMFLOAT4X4 matProjection;
 			};
 
 			// ================

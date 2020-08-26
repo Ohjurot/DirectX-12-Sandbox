@@ -28,7 +28,7 @@ namespace IF3D12 {
 			HRESULT createPsoObjects(D3D::Device* ptrDevice);
 
 		private:
-			PsoRegistry();
+			PsoRegistry() {};
 			~PsoRegistry();
 
 			std::vector<PsoRegistry::PsoDeskPso> m_vecPso;

@@ -44,8 +44,24 @@ HRESULT MY::Game::Init(WF::Window* ptrAppWindow, UINT width, UINT height){
 
 
     // == Create Constant buffer
-    m_constBuffer.getDataPointer()->matView = DirectX::XMMatrixScaling(((float)height / (float)width), 1.0f, 1.0f);
-    m_constBuffer.getDataPointer()->matTransform = DirectX::XMMatrixIdentity();
+    // Modell matrix
+    DirectX::XMStoreFloat4x4(
+        &m_constBuffer.getDataPointer()->matModell, DirectX::XMMatrixTranspose(
+            DirectX::XMMatrixIdentity()
+        )
+    );
+    // View matrix
+    DirectX::XMStoreFloat4x4(
+        &m_constBuffer.getDataPointer()->matView, DirectX::XMMatrixTranspose(
+            DirectX::XMMatrixIdentity()
+        )
+    );
+    // Projection matrix
+    DirectX::XMStoreFloat4x4(
+        &m_constBuffer.getDataPointer()->matProjection, DirectX::XMMatrixTranspose(
+            DirectX::XMMatrixScaling(((float)height / (float)width), 1.0f, 1.0f)
+        )
+    );
     m_constBuffer.updateIfDirty(m_ptrDevice);
 
     // Describe view
@@ -93,7 +109,11 @@ HRESULT MY::Game::Loop(){
 
         if (angel >= DirectX::XM_PI * 2) angel -= DirectX::XM_PI * 2;
 
-        m_constBuffer.getDataPointer()->matTransform = DirectX::XMMatrixRotationZ(angel);
+        DirectX::XMStoreFloat4x4(
+            &m_constBuffer.getDataPointer()->matModell, DirectX::XMMatrixTranspose(
+                DirectX::XMMatrixRotationZ(angel)
+            )
+        );
     }
     if (FAILED(m_constBuffer.updateIfDirty(m_ptrDevice))) {
         return E_FAIL;

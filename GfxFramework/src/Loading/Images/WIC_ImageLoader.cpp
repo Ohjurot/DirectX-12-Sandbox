@@ -244,9 +244,9 @@ HRESULT Util::TexureLoader::fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrD
         return E_FAIL;
     }
 
-    if (!((fSupport.Support1) & (1ULL << D3D12_FORMAT_SUPPORT1_TEXTURE2D))) {
+    if ((fSupport.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE2D) == 0x0) {
         // Fallback
-        memcpy(&frameNativeFormat, &GUID_WICPixelFormat32bppRGBA, sizeof(GUID));
+        memcpy(&targetFormat, &GUID_WICPixelFormat32bppRGBA, sizeof(GUID));
         targetFormatDx = DXGI_FORMAT_R8G8B8A8_UNORM;
         uiBitsPerPixel = 32;
     }
@@ -313,6 +313,224 @@ HRESULT Util::TexureLoader::fromFileToMemory(LPCWSTR fileName, D3D::Device* ptrD
     // Release Objects
     COM_RELEASE(ptrFrameDecoder);
     COM_RELEASE(ptrDecoder);
+    COM_RELEASE(ptrFactory);
+
+    return S_OK;
+}
+
+HRESULT Util::TexureLoader::fromMemoryToMemory(void* ptrDataIn, SIZE_T blobSize, D3D::Device* ptrDevice, void** ppMemory, SIZE_T* pSize, UINT* pWidth, UINT* pHeight, DXGI_FORMAT* ptrResultFormat){
+    HRESULT hr;
+
+    // Create wic factory
+    IWICImagingFactory* ptrFactory = NULL;
+    if (FAILED(hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&ptrFactory)))) {
+        return hr;
+    }
+
+    // Create WIC Stream
+    IWICStream* ptrStream = NULL;
+    if (FAILED(hr = ptrFactory->CreateStream(&ptrStream))) {
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Init memory
+    if (FAILED(hr = ptrStream->InitializeFromMemory((UINT8*)ptrDataIn, blobSize))) {
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Create decoder from file
+    IWICBitmapDecoder* ptrDecoder = NULL;
+    if (FAILED(hr = ptrFactory->CreateDecoderFromStream(ptrStream, 0, WICDecodeMetadataCacheOnDemand, &ptrDecoder))) {
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Get frame zero
+    IWICBitmapFrameDecode* ptrFrameDecoder = NULL;
+    if (FAILED(hr = ptrDecoder->GetFrame(0, &ptrFrameDecoder))) {
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Read the pixel format
+    WICPixelFormatGUID frameNativeFormat;
+    WICPixelFormatGUID targetFormat;
+    if (FAILED(hr = ptrFrameDecoder->GetPixelFormat(&frameNativeFormat))) {
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Check if format has direct conversabiliy
+    DXGI_FORMAT targetFormatDx;
+    if (!selectConverterDx(frameNativeFormat, &targetFormatDx)) {
+        // Try to find WIC to WIC converter
+        if (!selectConverterWic(frameNativeFormat, &targetFormat)) {
+            return ERROR_NOT_SUPPORTED;
+        }
+
+        if (!selectConverterDx(targetFormat, &targetFormatDx)) {
+            return E_FAIL;
+        }
+    }
+    else {
+        memcpy(&targetFormat, &frameNativeFormat, sizeof(GUID));
+    }
+
+    // Get format info
+    IWICComponentInfo* ptrCmpInfo = NULL;
+    if (FAILED(hr = ptrFactory->CreateComponentInfo(targetFormat, &ptrCmpInfo))) {
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Get type
+    WICComponentType ptrCmpType;
+    if (FAILED(hr = ptrCmpInfo->GetComponentType(&ptrCmpType))) {
+        COM_RELEASE(ptrCmpInfo);
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Check type
+    if (ptrCmpType != WICPixelFormat) {
+        COM_RELEASE(ptrCmpInfo);
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return ERROR_NOT_SUPPORTED;
+    }
+
+    // Get info from type
+    IWICPixelFormatInfo* ptrFormatInfo = NULL;
+    if (FAILED(hr = ptrCmpInfo->QueryInterface(IID_PPV_ARGS(&ptrFormatInfo)))) {
+        COM_RELEASE(ptrCmpInfo);
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Get BBP
+    UINT uiBitsPerPixel;
+    if (FAILED(hr = ptrFormatInfo->GetBitsPerPixel(&uiBitsPerPixel))) {
+        COM_RELEASE(ptrFormatInfo);
+        COM_RELEASE(ptrCmpInfo);
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Release
+    COM_RELEASE(ptrFormatInfo);
+    COM_RELEASE(ptrCmpInfo);
+
+    // Check device support
+    D3D12_FEATURE_DATA_FORMAT_SUPPORT fSupport;
+    ZeroMemory(&fSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT));
+    fSupport.Format = targetFormatDx;
+
+    if (FAILED(hr = ptrDevice->getDevice()->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)))) {
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrFactory);
+        return E_FAIL;
+    }
+
+    if ((fSupport.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE2D) == 0x0) {
+        // Fallback
+        memcpy(&targetFormat, &GUID_WICPixelFormat32bppRGBA, sizeof(GUID));
+        targetFormatDx = DXGI_FORMAT_R8G8B8A8_UNORM;
+        uiBitsPerPixel = 32;
+    }
+
+    // Image size
+    UINT width, height;
+    if (FAILED(hr = ptrFrameDecoder->GetSize(&width, &height))) {
+        COM_RELEASE(ptrFrameDecoder);
+        COM_RELEASE(ptrDecoder);
+        COM_RELEASE(ptrStream);
+        COM_RELEASE(ptrFactory);
+        return hr;
+    }
+
+    // Tempory memory allocation
+    UINT rowPitch = (width * uiBitsPerPixel + 7) / 8;
+    SIZE_T imageSize = (SIZE_T)rowPitch * (SIZE_T)height;
+    void* workMemory = malloc(imageSize);
+
+    // Check if direct copy is possible
+    if (memcmp(&frameNativeFormat, &targetFormat, sizeof(GUID)) == 0) {
+        if (FAILED(hr = ptrFrameDecoder->CopyPixels(NULL, rowPitch, (UINT)imageSize, (BYTE*)workMemory))) {
+            COM_RELEASE(ptrFrameDecoder);
+            COM_RELEASE(ptrDecoder);
+            COM_RELEASE(ptrStream);
+            COM_RELEASE(ptrFactory);
+            return hr;
+        }
+    }
+    else {
+        // Format conversion
+        IWICFormatConverter* ptrFormatConverter = NULL;
+        if (FAILED(hr = ptrFactory->CreateFormatConverter(&ptrFormatConverter))) {
+            COM_RELEASE(ptrFrameDecoder);
+            COM_RELEASE(ptrDecoder);
+            COM_RELEASE(ptrStream);
+            COM_RELEASE(ptrFactory);
+            return hr;
+        }
+
+        if (FAILED(hr = ptrFormatConverter->Initialize(ptrFrameDecoder, targetFormat, WICBitmapDitherTypeErrorDiffusion, NULL, 0, WICBitmapPaletteTypeCustom))) {
+            COM_RELEASE(ptrFormatConverter);
+            COM_RELEASE(ptrFrameDecoder);
+            COM_RELEASE(ptrDecoder);
+            COM_RELEASE(ptrStream);
+            COM_RELEASE(ptrFactory);
+            return hr;
+        }
+
+        if (FAILED(hr = ptrFormatConverter->CopyPixels(NULL, rowPitch, (UINT)imageSize, (BYTE*)workMemory))) {
+            COM_RELEASE(ptrFormatConverter);
+            COM_RELEASE(ptrFrameDecoder);
+            COM_RELEASE(ptrDecoder);
+            COM_RELEASE(ptrStream);
+            COM_RELEASE(ptrFactory);
+            return hr;
+        }
+
+        COM_RELEASE(ptrFormatConverter);
+    }
+
+    // Copy to output
+    *ppMemory = workMemory;
+    *ptrResultFormat = targetFormatDx;
+    *pSize = imageSize;
+    *pWidth = width;
+    *pHeight = height;
+
+    // Release Objects
+    COM_RELEASE(ptrFrameDecoder);
+    COM_RELEASE(ptrDecoder);
+    COM_RELEASE(ptrStream);
     COM_RELEASE(ptrFactory);
 
     return S_OK;
