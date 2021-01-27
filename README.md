@@ -1,3 +1,4 @@
+This project is archived and only here from the videos!
 # DirectX 12 Sandbox
 Just a little project witch helps you getting started with DirextX 12
 
